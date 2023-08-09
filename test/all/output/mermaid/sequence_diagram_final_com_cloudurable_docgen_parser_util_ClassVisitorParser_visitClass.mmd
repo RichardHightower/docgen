@@ -1,0 +1,18 @@
+---
+title: Visit Class (com.cloudurable.docgen.parser.util.ClassVisitorParser)
+---
+
+sequenceDiagram
+    ClassVisitorParser ->> JavaItem: Add JavaItem to javaItems
+    alt clsInner is ClassOrInterfaceDeclaration
+        ClassVisitorParser ->> ClassVisitorParser: Recursively visit inner class/interface using visitClassType
+    end
+    ClassVisitorParser -->> clsInner: Finished visiting inner class/interface
+    alt method is MethodDeclaration
+        ClassVisitorParser ->> ClassVisitorParser: Visit method using visitMethod
+    end
+    ClassVisitorParser -->> method: Finished visiting method
+    alt field is FieldDeclaration
+        ClassVisitorParser ->> ClassVisitorParser: Visit field using visitField
+    end
+    ClassVisitorParser -->> field: Finished visiting field

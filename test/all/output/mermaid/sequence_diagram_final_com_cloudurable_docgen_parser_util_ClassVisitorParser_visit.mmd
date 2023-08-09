@@ -1,0 +1,13 @@
+---
+title: Visit ClassOrInterfaceDeclaration in ClassVisitorParser
+---
+
+sequenceDiagram
+    participant ClassVisitorParser
+    participant VoidVisitorAdapter
+    participant ClassOrInterfaceDeclaration
+    participant CompilationUnit
+
+    ClassVisitorParser->>ClassOrInterfaceDeclaration: visitClass
+    VoidVisitorAdapter->>ClassOrInterfaceDeclaration: visit
+    ClassVisitorParser-->>VoidVisitorAdapter: Call super.visit

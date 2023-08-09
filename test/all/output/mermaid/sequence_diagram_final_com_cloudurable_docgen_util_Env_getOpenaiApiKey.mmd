@@ -1,0 +1,15 @@
+---
+title: Get OpenAI API Key
+---
+
+sequenceDiagram
+    participant Env
+    participant System
+    participant FileUtils
+
+    Env ->> System: Get the OPENAI_API_KEY
+    alt OPENAI_API_KEY is not set or is blank
+      Env ->> FileUtils: Read open_ai_api_key.txt file
+      FileUtils -->> Env: OpenAI API key from file
+    end
+    Env ->> return: Return the OPENAI_API_KEY trimmed

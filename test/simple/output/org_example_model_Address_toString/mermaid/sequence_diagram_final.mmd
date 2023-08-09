@@ -1,0 +1,24 @@
+---
+title: toString (org.example.model.Address)
+---
+
+sequenceDiagram
+    participant Address
+    participant StringBuilder
+    
+    Address-->>StringBuilder: Create StringBuilder instance
+    Address->>StringBuilder: Append "Address{"
+    Address->>StringBuilder: Append "street='"
+    Address->>StringBuilder: Append street
+    Address->>StringBuilder: Append "'"
+    Address->>StringBuilder: Append ", town='"
+    Address->>StringBuilder: Append town
+    Address->>StringBuilder: Append "'"
+    Address->>StringBuilder: Append ", country='"
+    Address->>StringBuilder: Append country
+    Address->>StringBuilder: Append "'"
+    Address->>StringBuilder: Append ", postalCode='"
+    Address->>StringBuilder: Append postalCode
+    Address->>StringBuilder: Append "'"
+    Address->>StringBuilder: Append "}"
+    StringBuilder-->>Address: Return StringBuilder as a String

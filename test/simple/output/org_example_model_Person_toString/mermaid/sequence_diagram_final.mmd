@@ -1,0 +1,13 @@
+---
+title: toString (Person)
+---
+
+sequenceDiagram
+    participant Person
+    participant StringBuilder
+    participant Address
+  
+    Person ->> StringBuilder: Convert Person to a String
+    StringBuilder -->> Person: Return the generated String
+    Address ->> StringBuilder: Convert Address to a String
+    StringBuilder -->> Address: Return the generated String

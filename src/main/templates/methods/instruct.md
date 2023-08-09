@@ -54,6 +54,8 @@ following the instructions below:
    * Add sub-bullet for each participant with a sub list of the interaction it is mentioned in from `Clean Interaction`.
    * If there are no interactions in the sub-list than it should not be on this list so add an extra sub-bullet with the text `REMOVE`.
 6. `Plain English Title`: Create a plain English title based on  "{{TITLE}}".
+   * No method calls so nothing like `toString()`
+   * No parenthesis: NO '(' NO ')'
 7. Finally, create the mermaid code for the sequence diagram
     * make sure it uses the `Plain English Title` for the title.
     * make sure it uses participants from the plain `Final Participants` and the participant is not marked `REMOVE`
@@ -68,4 +70,32 @@ following the instructions below:
 
 {{JAVA_METHOD}}
 
+```
+
+# Participants
+(format markdown)
+
+# Initial Interactions
+(format markdown)
+
+# Clean Interactions
+(format markdown)
+
+# Final Participants
+(format markdown)
+
+# Plain English Title
+(format markdown)
+
+# Mermaid Sequence Diagram
+(format mermaid markup below)
+
+```mermaid
+---
+title: {{Plain English Title}}
+---
+
+sequenceDiagram
+    {{Final Participants}}
+    {{Clean Interactions}}
 ```

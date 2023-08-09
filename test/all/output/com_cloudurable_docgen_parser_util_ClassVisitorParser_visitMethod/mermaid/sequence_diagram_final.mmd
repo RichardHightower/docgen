@@ -1,0 +1,12 @@
+---
+title: Visit Method (ClassVisitorParser)
+---
+
+sequenceDiagram
+    participant ClassVisitorParser
+    participant VoidVisitorAdapter
+    participant JavaItem
+
+    ClassVisitorParser -->> VoidVisitorAdapter: Visit Method
+    ClassVisitorParser->>JavaItem: Create new JavaItem
+    ClassVisitorParser-->>JavaItem: Add JavaItem to javaItems list

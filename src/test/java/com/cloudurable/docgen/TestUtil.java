@@ -19,4 +19,15 @@ public class TestUtil {
         }
         return javaItems;
     }
+
+    public static List<JavaItem> loadProject(String path) {
+        final var parser = new ClassVisitorParser();
+        List<JavaItem> javaItems = null;
+        try {
+            javaItems = parser.scanDirectory(new File(path));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return javaItems;
+    }
 }

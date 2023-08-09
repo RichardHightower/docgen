@@ -1,18 +1,20 @@
 ---
-title: Change Employee Department
+title: Check Collection (NoCollectionRule)
 ---
-sequenceDiagram
-    participant HRService
-    participant WorkflowService
-    participant HRRepo
 
-    HRService->>WorkflowService: Initiate Change Department Workflow
-    alt Employee is not a new hire
-        HRService-->>WorkflowService: Workflow Initiated
-    else Employee is a new hire
-        HRService->>HRRepo: Update Manager
-        HRService->>HRRepo: Update Department
-        alt HRRepoException Caught
-            HRService-->>HRService: Log Error
-        end
-    end
+sequenceDiagram
+    participant NoCollectionRule
+    participant Pattern
+    participant Matcher
+    participant RuleResult
+
+    NoCollectionRule->>Pattern: Create Pattern object
+    NoCollectionRule->>Matcher: Create Matcher object
+    NoCollectionRule->>Matcher: Invoke find method
+    Matcher->>NoCollectionRule: Match found
+    alt Match found
+        Matcher->>NoCollectionRule: Extract collectionType
+        Matcher->>NoCollectionRule: Extract genericType
+        NoCollectionRule-->>RuleResult: Build RuleResult object
+    else No match found
+        NoCollectionRule-->>RuleResult: Build RuleResult object

@@ -1,0 +1,15 @@
+---
+title: Visiting Field in ClassVisitorParser (com.cloudurable.docgen.parser.util.ClassVisitorParser)
+---
+
+sequenceDiagram
+    participant ClassVisitorParser
+    participant VoidVisitorAdapter
+    participant extractJavaDoc
+    participant JavaItem
+
+    ClassVisitorParser->>VoidVisitorAdapter: Visit field
+    VoidVisitorAdapter->>extractJavaDoc: Extract JavaDoc from field
+    extractJavaDoc-->>VoidVisitorAdapter: Returns JavaDoc and code parts
+    VoidVisitorAdapter->>JavaItem: Create JavaItem with JavaDoc
+    VoidVisitorAdapter->>javaItems: Add JavaItem to javaItems list

@@ -1,0 +1,22 @@
+---
+title: Check Collection
+---
+
+sequenceDiagram
+    participant NoCollectionRule
+    participant Pattern
+    participant Matcher
+    participant RuleResult
+
+    NoCollectionRule->>Pattern: Create Pattern object
+    NoCollectionRule->>Matcher: Create Matcher object
+    NoCollectionRule->>Matcher: Invoke find method
+    Matcher->>NoCollectionRule: Match found
+    alt Match found
+        Matcher->>NoCollectionRule: Extract collectionType
+        Matcher->>NoCollectionRule: Extract genericType
+        NoCollectionRule-->>RuleResult: Build RuleResult object
+    else No match found
+        NoCollectionRule-->>RuleResult: Build RuleResult object
+    end
+

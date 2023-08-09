@@ -1,0 +1,13 @@
+---
+title: JavaItem Body
+---
+
+sequenceDiagram
+    participant JavaItem
+    participant StringBuilder
+
+    JavaItem-->>JavaItem: call getBody method
+    opt
+        JavaItem-->>JavaItem: get value of body field
+    end
+    JavaItem-->>StringBuilder: append value of body field

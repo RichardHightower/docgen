@@ -1,0 +1,14 @@
+---
+title: toString (Manager)
+---
+
+sequenceDiagram
+    participant Manager
+    participant Employee
+    participant StringBuilder
+    
+    Manager->>StringBuilder: Create StringBuilder
+    StringBuilder->>Manager: Append manager
+    loop Append employee
+        StringBuilder-->>Employee: Append employee
+    end

@@ -20,27 +20,38 @@ public class MethodMermaidSequenceGen {
 
     private final OpenAIClient client;
     private final List<Message> context = new ArrayList<>();
+    private final int  maxTokens;
+    private final String  model; //
+    private final float temperature;
+    private final boolean validateJson;
 
-    public  MethodMermaidSequenceGen(){
+    private final File templateDir = new File("src/main/templates/methods/");
 
-        client = OpenAIClient.builder().validateJson(true).setApiKey(getOpenaiApiKey()).build();
+    public  MethodMermaidSequenceGen(Builder builder){
+        this.maxTokens = builder.maxTokens;
+        this.model = builder.model;
+        this.temperature = builder.temperature;
+        this.validateJson = builder.validateJson;
+
+        client = builder.client != null ? builder.client :
+                OpenAIClient.builder().validateJson(this.validateJson).setApiKey(getOpenaiApiKey()).build();
 
         final var systemMessage = Message.builder().role(Role.SYSTEM)
-                .content(FileUtils.readFile(new File("src/main/templates/methods/system.md")))
+                .content(FileUtils.readFile(new File(templateDir, "system.md")))
                 .build();
         context.add(systemMessage);
 
         final var assistantMessage = Message.builder().role(Role.ASSISTANT)
-                .content(FileUtils.readFile(new File("src/main/templates/methods/example.md")))
+                .content(FileUtils.readFile(new File(templateDir, "example.md")))
                 .build();
         context.add(assistantMessage);
 
     }
 
 
-    private static ChatRequest.Builder requesatBuilder(List<Message> context) {
+    private  ChatRequest.Builder requesatBuilder(List<Message> context) {
         return ChatRequest.builder().messages(new ArrayList<>(context))
-                .maxTokens(2000).temperature(0.0f).model("gpt-3.5-turbo-16k-0613");
+                .maxTokens(maxTokens).temperature(temperature).model(model);
     }
 
     private static RuleRunner buildRuleRunner() {
@@ -93,7 +104,7 @@ public class MethodMermaidSequenceGen {
             promptBuilder.append(convertMessageToMarkdown(message));
         });
 
-        final var template = FileUtils.readFile(new File("src/main/templates/methods/instruct.md"));
+        final var template = FileUtils.readFile(new File(this.templateDir, "instruct.md"));
         final var instruction = template.replace("{{JAVA_METHOD}}", javaMethodSource)
                 .replace("{{TITLE}}", title);
 
@@ -105,7 +116,8 @@ public class MethodMermaidSequenceGen {
         final var request = builder.addMessage(instructionMessage).build();
 
 
-        return runValidationFeedbackLoop(javaMethodSource, title, instruction, request, ruleRunner, promptConsumer, responseConsumer);
+        return runValidationFeedbackLoop(javaMethodSource, title, instruction, request, ruleRunner,
+                promptConsumer, responseConsumer);
     }
 
 
@@ -131,21 +143,22 @@ public class MethodMermaidSequenceGen {
                 final var response = chatResponse.getResponse().get();
                 final var chatChoice = response.getChoices().get(0);
                 final var original = chatChoice.getMessage().getContent();
-                promptConsumer.accept("----\n# ORIGINAL RESPONSE \n" + original);
+                responseConsumer.accept("----\n# ORIGINAL RESPONSE \n" + original);
                 final var mermaidDiagram = extractSequenceDiagram(original);
-                return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner, 3, promptConsumer, responseConsumer);
+                return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner,
+                        promptConsumer, responseConsumer);
             }
         }
         return "";
     }
 
     private String validateMermaid(String javaMethodSource, String mermaidDiagram, String title,
-                                   RuleRunner ruleRunner,  Consumer<String> promotConsumer, Consumer<String> responseConsumer) {
-        return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner,3, promotConsumer, responseConsumer);
+                                   RuleRunner ruleRunner,  Consumer<String> promptConsumer, Consumer<String> responseConsumer) {
+        return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner,3, promptConsumer, responseConsumer);
     }
 
     private String validateMermaid(String javaMethodSource, final String originalMermaidDiagram, String title,
-                                   RuleRunner ruleRunner, int count, Consumer<String> promotConsumer,
+                                   RuleRunner ruleRunner, int count, Consumer<String> promptConsumer,
                                    Consumer<String> responseConsumer) {
 
         if (count <= 0) {
@@ -162,23 +175,24 @@ public class MethodMermaidSequenceGen {
             promptBuilder.append(convertMessageToMarkdown(message));
         });
 
-        final var templateMermaid = FileUtils.readFile(new File("src/main/templates/methods/fix.md"));
+        final var templateMermaid = FileUtils.readFile(new File(this.templateDir,"fix.md"));
 
         final var checks = ruleRunner.checkContent(originalMermaidDiagram);
 
         if (!checks.isEmpty()) {
-            final var fixInstruction = templateMermaid
+            final var fixInstruction = "----\n# FIX PROMPT TRY " + count + "\n" +
+                    (templateMermaid
                     .replace("{{JAVA_METHOD}}", javaMethodSource)
                     .replace("{{JSON}}", RuleRunner.serializeRuleResults(checks))
                     .replace("{{MERMAID}}", originalMermaidDiagram)
-                    .replace("{{TITLE}}", title);
+                    .replace("{{TITLE}}", title));
 
            final var fixMessage = Message.builder().role(Role.USER)
                     .content(fixInstruction).build();
 
 
             promptBuilder.append(convertMessageToMarkdown(fixMessage));
-            promotConsumer.accept(promptBuilder.toString());
+            promptConsumer.accept(promptBuilder.toString());
 
             final var fixRequest = builder.addMessage(fixMessage).build();
 
@@ -200,13 +214,53 @@ public class MethodMermaidSequenceGen {
                 responseConsumer.accept("----\n# FIX RAW RESPONSE " + count + "\n" + original);
                 final var mermaidDiagram = extractSequenceDiagram(original);
                 return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner, count - 1,
-                        promotConsumer, responseConsumer);
+                        promptConsumer, responseConsumer);
             } else {
                 return originalMermaidDiagram;
             }
 
         } else {
             return originalMermaidDiagram;
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+    public static class Builder {
+        private  OpenAIClient client;
+        private  int  maxTokens = 2000;
+        private  String  model = "gpt-3.5-turbo-16k-0613";
+        private  float temperature = 0.0f;
+        private  boolean validateJson;
+
+        public Builder setClient(OpenAIClient client) {
+            this.client = client;
+            return this;
+        }
+
+        public Builder setMaxTokens(int maxTokens) {
+            this.maxTokens = maxTokens;
+            return this;
+        }
+
+        public Builder setModel(String model) {
+            this.model = model;
+            return this;
+        }
+
+        public Builder setTemperature(float temperature) {
+            this.temperature = temperature;
+            return this;
+        }
+
+        public Builder setValidateJson(boolean validateJson) {
+            this.validateJson = validateJson;
+            return this;
+        }
+
+        public MethodMermaidSequenceGen build() {
+            return  new MethodMermaidSequenceGen(this);
         }
     }
 

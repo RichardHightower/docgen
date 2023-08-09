@@ -1,0 +1,31 @@
+---
+title: Validation of NoArrayRule for class Relationship
+---
+
+sequenceDiagram
+    participant NoArrayRule
+    participant Relationship
+    participant RuleResult
+
+    NoArrayRule->>Relationship: Check if line has a relationship
+    alt Line has a relationship
+        Relationship->>Relationship: Parse relationship
+        alt Relationship is valid
+            NoArrayRule->>Relationship: Check left side for array usage
+            alt Left side does not contain array
+                NoArrayRule-->>RuleResult: Return SUCCESS
+            else Left side contains array
+                NoArrayRule-->>RuleResult: Return appropriate error message
+            end
+            NoArrayRule->>Relationship: Check right side for array usage
+            alt Right side does not contain array
+                NoArrayRule-->>RuleResult: Return SUCCESS
+            else Right side contains array
+                NoArrayRule-->>RuleResult: Return appropriate error message
+            end
+        else Relationship is invalid
+            NoArrayRule-->>RuleResult: Return appropriate error message
+        end
+    else Line does not have a relationship
+        NoArrayRule-->>RuleResult: Return SUCCESS
+    end

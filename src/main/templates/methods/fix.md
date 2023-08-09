@@ -45,6 +45,8 @@ following the instructions below:
 6. `Interaction After Fix`: Show the list of interaction with any fixes applied from the `Validation Fixes` section.
 7. `Final Participants`: Show the list of participants from `Participants After Fix` with participants removed if participant is not used in `Interaction After Fix` .
 8. `Plain English Title`: Create a plain English title based on  "{{TITLE}}".
+   * No method calls so nothing like `toString()`
+   * No parenthesis: NO '(' NO ')'. 
 9. Finally, create the mermaid code for the sequence diagram
    * make sure it uses the `Plain English Title` for the title. 
    * make sure it uses participants from the plain `Final Participants`.
@@ -70,9 +72,6 @@ following the instructions below:
 ```
 
 
-# Instruction
-Regenerate a mermaid sequence diagram based on the above guidelines and the validation results titled {{TITLE}}
-
 
 # Validation JSON
 
@@ -80,4 +79,34 @@ Regenerate a mermaid sequence diagram based on the above guidelines and the vali
 
 {{JSON}}
 
+```
+
+
+
+
+# Participants
+(format markdown)
+
+# Validation Fixes
+(format markdown)
+
+# Interaction After Fix
+(format markdown)
+
+# Final Participants
+(format markdown)
+
+# Plain English Title
+(format markdown)
+
+# Mermaid Sequence Diagram
+
+```mermaid
+---
+title: {{Plain English Title}}
+---
+
+sequenceDiagram
+    {{Final Participants}}
+    {{Clean Interactions}}
 ```

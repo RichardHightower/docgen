@@ -1,0 +1,15 @@
+---
+title: Write File
+---
+
+sequenceDiagram
+    participant FileUtils
+    participant java.nio.file.Files
+
+    FileUtils->>java.nio.file.Files: Write file
+    alt Successful write
+        FileUtils-->>FileUtils: File successfully written
+    else Exception occurred
+        FileUtils-->>FileUtils: Exception occurred
+        FileUtils-->>FileUtils: Throw RuntimeException
+    end

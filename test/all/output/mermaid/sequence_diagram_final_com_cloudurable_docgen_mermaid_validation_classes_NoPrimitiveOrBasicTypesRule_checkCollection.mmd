@@ -1,0 +1,18 @@
+---
+title: Check Collection (NoPrimitiveOrBasicTypesRule)
+---
+
+sequenceDiagram
+    participant NoPrimitiveOrBasicTypesRule
+    participant Pattern
+    participant Matcher
+    participant RuleResult
+
+    NoPrimitiveOrBasicTypesRule->>Pattern: Create Pattern
+    NoPrimitiveOrBasicTypesRule->>Matcher: Create Matcher
+    Matcher->>Matcher: Find match in input
+    alt Match found
+        Matcher->>Matcher: Get matched type
+        NoPrimitiveOrBasicTypesRule-->>RuleResult: Create RuleResult with type
+    else No match found
+        NoPrimitiveOrBasicTypesRule-->>RuleResult: Create RuleResult SUCCESS

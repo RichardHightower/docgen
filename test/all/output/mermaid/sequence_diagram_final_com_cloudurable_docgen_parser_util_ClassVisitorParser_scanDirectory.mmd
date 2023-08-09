@@ -1,0 +1,17 @@
+---
+title: Scan Directory
+---
+
+sequenceDiagram
+    participant ClassVisitorParser
+    participant Stream~Path~
+    participant Files
+    participant Path
+    participant IOException
+    
+    ClassVisitorParser->>Stream~Path~: Scan directory
+    Stream~Path~->>Files: Filter out regular files
+    Files->>Stream~Path~: Get file paths
+    Stream~Path~->>ClassVisitorParser: Parse each file
+    ClassVisitorParser-->>Stream~Path~: Add parsed Java items to javaItems
+    ClassVisitorParser->>ClassVisitorParser: Return javaItems list

@@ -54,11 +54,38 @@ class MethodMermaidSequenceGenTest {
         System.out.println(mermaidCode);
     }
 
+    @Test
+    public void readAllFromHere() {
+        List<JavaItem> javaItems = TestUtil.loadProject("./src/main/java");
+        javaItems.stream().filter(item -> item.getType() == JavaItemType.METHOD).forEach(method ->
+        {
+            String simpleClassName = method.getParent().getSimpleName();
+            String methodName = method.getSimpleName();
+            String mermaidCode = testSequenceDiagram(10, true, simpleClassName,
+                    methodName, "all", javaItems);
+            System.out.println(mermaidCode);
+        });
+
+    }
+
+    @Test
+    public void readAllFromHere2() {
+        List<JavaItem> javaItems = TestUtil.loadProject("./src/main/java");
+        int size = javaItems.stream().filter(item -> item.getType() == JavaItemType.METHOD).collect(Collectors.toList()).size();
+        System.out.println(size);
+
+    }
 
     public String testSequenceDiagram(String simpleClassName, String methodName) {
+        return testSequenceDiagram(3, false, simpleClassName, methodName, "simple", TestUtil.loadSimpleProject());
+    }
 
+    public String testSequenceDiagram(int count, boolean ignore, String simpleClassName,
+                                      String methodName, String prefix, List<JavaItem> javaItems) {
 
-        List<JavaItem> javaItems = TestUtil.loadSimpleProject();
+        final File rootDir = new File("test/"+ prefix+"/output");
+        rootDir.mkdirs();
+
 
         Optional<JavaItem> classOptional = javaItems.stream().filter(javaItem -> javaItem.getType() == JavaItemType.CLASS)
                 .filter(clazz -> clazz.getName().endsWith(simpleClassName)).findFirst();
@@ -84,16 +111,29 @@ class MethodMermaidSequenceGenTest {
         JavaItem method = methodOpt.get();
 
         StringBuilder body = new StringBuilder();
-        body.append("Parent class: ").append(method.getParent().getDefinition()).append("\n");
+        body.append("Parent class:\n").append(method.getParent().getDefinition()).append("\n");
 
         body.append("Parent Class Fields:\n");
         for (var field : fields) {
-            body.append(field.getDefinition()).append("\n");
+            body.append("\t").append(field.getDefinition()).append("\n");
         }
         body.append("Method Body:\n");
-        body.append(method.getBody());;
+        body.append(method.getBody());
 
-        final var gen = new MethodMermaidSequenceGen();
+        File methodDir = new File(rootDir, method.getName().replace('.', '_'));
+        methodDir.mkdirs();
+        File promptDir = new File(methodDir, "prompts");
+        File mermaidDir = new File(methodDir, "mermaid");
+
+        promptDir.mkdirs();
+        mermaidDir.mkdirs();
+
+        final var gen = MethodMermaidSequenceGen.builder()
+                .setModel("gpt-3.5-turbo-16k-0613")
+                .setTemperature(0.0f)
+                .setMaxTokens(2000)
+                .setValidateJson(false).build();
+
         final var counter = new AtomicInteger();
         final var promptBuilder = new StringBuilder();
         final var responseBuilder = new StringBuilder();
@@ -101,10 +141,21 @@ class MethodMermaidSequenceGenTest {
                 body.toString(), method.getSimpleName(), method.getParent().getName(), "org.example.model", prompt -> {
                     promptBuilder.append(prompt);
                     counter.incrementAndGet();
+                    File outputFile = new File(promptDir, "prompt_" + counter.get() + ".md");
+                    FileUtils.writeFile(outputFile, prompt);
                     System.out.println("##########################################################################");
                     System.out.println(prompt);
                     System.out.println("##########################################################################");
-                }, responseBuilder::append);
+                }, output -> {
+                    File outputFile = new File(mermaidDir, "sequence_diagram" + counter.get() + ".md");
+                    FileUtils.writeFile(outputFile, output);
+                });
+
+        File outputFile = new File(mermaidDir, "sequence_diagram_final.mmd");
+        File outputFile2 = new File(rootDir, "mermaid/sequence_diagram_final_" + method.getName().replace('.', '_') + ".mmd");
+        outputFile2.getParentFile().mkdirs();
+        FileUtils.writeFile(outputFile, mermaidCode);
+        FileUtils.writeFile(outputFile2, mermaidCode);
 
         try {
             Pattern titlePattern = Pattern.compile("^---\\s*title:\\s*[^-\\s][^\\n]*\\s*---");
@@ -115,7 +166,7 @@ class MethodMermaidSequenceGenTest {
             assertTrue(addressPattern.matcher(mermaidCode).find(), "The mermaidCode should have a participant");
             validateMermaid(mermaidCode);
             System.out.println("COUNTER " + counter);
-            assertTrue(counter.get() < 5, "We did not retry more than");
+            assertTrue(counter.get() < count, "We did not retry more than");
         }catch (AssertionFailedError ex) {
             System.out.println("Mermaid Code -------------- ");
             System.out.println(mermaidCode);
@@ -123,7 +174,12 @@ class MethodMermaidSequenceGenTest {
             System.out.println(promptBuilder);
             System.out.println("RESPONSES -------------- ");
             System.out.println(responseBuilder);
-            throw ex;
+            if (ignore) {
+                ex.printStackTrace();
+                return "";
+            } else {
+                throw ex;
+            }
         }
 
 

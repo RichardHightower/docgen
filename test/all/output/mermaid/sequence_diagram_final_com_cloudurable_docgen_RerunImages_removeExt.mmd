@@ -1,0 +1,13 @@
+---
+title: Remove Extension Method
+---
+
+sequenceDiagram
+    participant RerunImages
+
+    RerunImages->>RerunImages: Invoke removeExt method with name parameter
+    alt Checking if extension exists in the name
+        RerunImages->>RerunImages: Return the substring before the extension
+    else Extension doesn't exist in the name
+        RerunImages->>RerunImages: Return the original name
+    end

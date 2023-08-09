@@ -1,0 +1,14 @@
+---
+title: Visit Class Type
+---
+
+sequenceDiagram
+    participant ClassVisitorParser
+    participant ClassOrInterfaceDeclaration
+    participant JavaItem
+
+    ClassVisitorParser->>ClassOrInterfaceDeclaration: Extract JavaDoc and code
+    ClassVisitorParser->>JavaItem: Create JavaItem
+    JavaItem->>JavaItem: Set importBody, type, name, simple name, definition, JavaDoc, body
+    JavaItem->>+JavaItem: Set parent
+    JavaItem-->>ClassVisitorParser: JavaItem created

@@ -1,0 +1,15 @@
+---
+title: ClassVisitorParser Run
+---
+
+sequenceDiagram
+    participant ClassVisitorParser
+    participant StaticJavaParser as Static JavaParser
+    participant CompilationUnit
+    participant List~JavaItem~
+
+    ClassVisitorParser->>StaticJavaParser: parse file
+    ClassVisitorParser->>CompilationUnit: Assign to compilationUnit field
+    CompilationUnit->>ClassVisitorParser: accept visitor
+    CompilationUnit->>ClassVisitorParser: For each node
+    ClassVisitorParser->>List~JavaItem~: Add JavaItem to list
