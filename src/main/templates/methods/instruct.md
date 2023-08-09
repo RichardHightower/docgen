@@ -37,8 +37,9 @@ following the instructions below:
 4. Show the list of participants.
 5. Now show the interaction between the participants using a markdown list, and explain each in plain English. 
 6. Ensure there are no angle brackets in the interactions. Replace <> with ~, i.e., List<Employee> to List~Employee~.
-7. Create a plain English title based on  {{TITLE}}, "This method does "
-8. Finally, create the mermaid code for the sequence diagram and make sure it uses the plain English title.
+7. Ensure there are no method calls in the interaction description, just plain English.
+8. Create a plain English title based on  {{TITLE}}, "This method does "
+9. Finally, create the mermaid code for the sequence diagram and make sure it uses the plain English title.
 
 
 # Java method 
