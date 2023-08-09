@@ -64,7 +64,7 @@ public class MethodMermaidSequenceGen {
         rules.add(new SystemOutRule());
         rules.add(new DataClassesAndPrimitiveRule());
 
-        ruleRunner = RuleRunner.builder().contentRules(List.of(new TitleRequiredRule(), MermaidUtils.createRule()))
+        ruleRunner = RuleRunner.builder().contentRules(List.of(new TitleRequiredRule(), new MismatchedTagsRule(), MermaidUtils.createRule()))
                 .rules(rules).build();
         return ruleRunner;
     }

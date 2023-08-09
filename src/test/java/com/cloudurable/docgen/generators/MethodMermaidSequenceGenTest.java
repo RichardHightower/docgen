@@ -12,6 +12,7 @@ import org.opentest4j.AssertionFailedError;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,27 +55,76 @@ class MethodMermaidSequenceGenTest {
         System.out.println(mermaidCode);
     }
 
-    @Test
-    public void readAllFromHere() {
+
+    public void readAllFromHereOLD() {
         List<JavaItem> javaItems = TestUtil.loadProject("./src/main/java");
+
+        List<JavaItem> methods = javaItems.stream().filter(item -> item.getType() == JavaItemType.METHOD).collect(Collectors.toList());
+        final int size = methods.size();
+        final AtomicInteger counter = new AtomicInteger();
+        System.out.println(size);
+
+
         javaItems.stream().filter(item -> item.getType() == JavaItemType.METHOD).forEach(method ->
         {
             String simpleClassName = method.getParent().getSimpleName();
             String methodName = method.getSimpleName();
             String mermaidCode = testSequenceDiagram(10, true, simpleClassName,
                     methodName, "all", javaItems);
+
+            int currentCount = counter.incrementAndGet();
+            System.out.println("######################## MERMAID CODE");
             System.out.println(mermaidCode);
+            System.out.printf("Total %d, \t Count Done %d, \t Remaining %d\n", size, currentCount, size - currentCount);
         });
 
     }
 
     @Test
-    public void readAllFromHere2() {
+    public void readAllFromHere() {
         List<JavaItem> javaItems = TestUtil.loadProject("./src/main/java");
-        int size = javaItems.stream().filter(item -> item.getType() == JavaItemType.METHOD).collect(Collectors.toList()).size();
+
+        List<JavaItem> methods = javaItems.stream().filter(item -> item.getType() == JavaItemType.METHOD).collect(Collectors.toList());
+        final int size = methods.size();
+        final AtomicInteger counter = new AtomicInteger();
         System.out.println(size);
 
+        long startTotalTime = System.nanoTime(); // Track the start time of the entire loop
+
+        methods.forEach(method -> {
+            long startIterationTime = System.nanoTime(); // Track the start time of the current iteration
+
+            String simpleClassName = method.getParent().getSimpleName();
+            String methodName = method.getSimpleName();
+            String mermaidCode = testSequenceDiagram(10, true, simpleClassName, methodName, "all", javaItems);
+
+            int currentCount = counter.incrementAndGet();
+            System.out.println("######################## MERMAID CODE");
+            System.out.println(mermaidCode);
+            System.out.printf("Total %d, \t Count Done %d, \t Remaining %d\n", size, currentCount, size - currentCount);
+
+            long endIterationTime = System.nanoTime(); // Track the end time of the current iteration
+            long elapsedIterationTime = endIterationTime - startIterationTime;
+            System.out.printf("Time taken for this iteration: %d minutes, %d seconds\n",
+                    TimeUnit.NANOSECONDS.toMinutes(elapsedIterationTime),
+                    TimeUnit.NANOSECONDS.toSeconds(elapsedIterationTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.NANOSECONDS.toMinutes(elapsedIterationTime))
+            );
+            long endTotalTime = System.nanoTime(); // Track the end time of the entire loop
+            long elapsedTotalTime = endTotalTime - startTotalTime;
+            System.out.printf("Total time taken for all iterations so far: %d minutes, %d seconds\n",
+                    TimeUnit.NANOSECONDS.toMinutes(elapsedTotalTime),
+                    TimeUnit.NANOSECONDS.toSeconds(elapsedTotalTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.NANOSECONDS.toMinutes(elapsedTotalTime))
+            );
+        });
+
+        long endTotalTime = System.nanoTime(); // Track the end time of the entire loop
+        long elapsedTotalTime = endTotalTime - startTotalTime;
+        System.out.printf("Total time taken for all iterations: %d minutes, %d seconds\n",
+                TimeUnit.NANOSECONDS.toMinutes(elapsedTotalTime),
+                TimeUnit.NANOSECONDS.toSeconds(elapsedTotalTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.NANOSECONDS.toMinutes(elapsedTotalTime))
+        );
     }
+
 
     public String testSequenceDiagram(String simpleClassName, String methodName) {
         return testSequenceDiagram(3, false, simpleClassName, methodName, "simple", TestUtil.loadSimpleProject());
@@ -87,7 +137,8 @@ class MethodMermaidSequenceGenTest {
         rootDir.mkdirs();
 
 
-        Optional<JavaItem> classOptional = javaItems.stream().filter(javaItem -> javaItem.getType() == JavaItemType.CLASS)
+        Optional<JavaItem> classOptional = javaItems.stream().filter(javaItem -> javaItem.getType() == JavaItemType.CLASS
+                        || javaItem.getType() == JavaItemType.INTERFACE)
                 .filter(clazz -> clazz.getName().endsWith(simpleClassName)).findFirst();
 
         if (!classOptional.isPresent()) {

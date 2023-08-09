@@ -1,5 +1,5 @@
 ---
-title: Check Collection (NoCollectionRule)
+title: Check Collection for Violation
 ---
 
 sequenceDiagram
@@ -8,13 +8,12 @@ sequenceDiagram
     participant Matcher
     participant RuleResult
 
-    NoCollectionRule->>Pattern: Create Pattern object
-    NoCollectionRule->>Matcher: Create Matcher object
-    NoCollectionRule->>Matcher: Invoke find method
-    Matcher->>NoCollectionRule: Match found
+    NoCollectionRule->>checkCollection: Check collection for violation
+    checkCollection->>Pattern: Create Pattern object with regex
+    checkCollection->>Matcher: Create Matcher object with input
+    checkCollection->>Matcher: Find a match
     alt Match found
-        Matcher->>NoCollectionRule: Extract collectionType
-        Matcher->>NoCollectionRule: Extract genericType
-        NoCollectionRule-->>RuleResult: Build RuleResult object
+        checkCollection-->>NoCollectionRule: Return RuleResult object with rule name, line number, violated line, and description
     else No match found
-        NoCollectionRule-->>RuleResult: Build RuleResult object
+        checkCollection-->>NoCollectionRule: Return RuleResult.SUCCESS object
+    end

@@ -9,8 +9,6 @@ public class TitleRequiredRule implements ContentRule {
 
     Pattern TITLE_PATTERN = Pattern.compile("^---\\s*title:\\s*[^-\\s][^\\n]*\\s*---");
 
-    //            Pattern titlePattern = Pattern.compile("^---\\s*title:\\s*[^-\\s][^\\n]*\\s*---");
-    //            assertTrue(titlePattern.matcher(mermaidCode).find(),"The mermaidCode should have a title");
     @Override
     public RuleResult check(String content) {
         if (!TITLE_PATTERN.matcher(content).find()) {
