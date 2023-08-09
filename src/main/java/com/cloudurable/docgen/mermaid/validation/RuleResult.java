@@ -1,6 +1,7 @@
 package com.cloudurable.docgen.mermaid.validation;
 
-import com.cloudurable.jai.util.JsonSerializer;
+import com.cloudurable.jai.util.JsonBuilder;
+import com.cloudurable.jai.util.PrettyJsonSerializer;
 
 /**
  * The RuleResult class encapsulates the result of a validation rule being applied to a line of text.
@@ -101,7 +102,7 @@ public class RuleResult {
      * @return A JSON string representing this RuleResult.
      */
     public String serialize() {
-        final JsonSerializer jsonSerializer = new JsonSerializer();
+        final JsonBuilder jsonSerializer = new PrettyJsonSerializer();
         jsonSerializer.startObject();
         jsonSerializer.addAttribute("lineNumber", this.lineNumber);
         jsonSerializer.addAttribute("violatedLine", this.violatedLine);

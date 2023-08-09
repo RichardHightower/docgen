@@ -1,7 +1,9 @@
 package com.cloudurable.docgen.mermaid.validation;
 
 
+import com.cloudurable.jai.util.JsonBuilder;
 import com.cloudurable.jai.util.JsonSerializer;
+import com.cloudurable.jai.util.PrettyJsonSerializer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +24,7 @@ public class RuleRunner {
     }
 
     public static String serializeRuleResults(List<RuleResult> ruleResults) {
-        JsonSerializer jsonSerializer = new JsonSerializer();
+        JsonBuilder jsonSerializer = new PrettyJsonSerializer();
 
         jsonSerializer.startArray();
 

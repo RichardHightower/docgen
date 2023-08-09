@@ -11,7 +11,8 @@ public class NoMethodCallsInDescriptionsRule implements LineRule {
     private final Pattern PATTERN = Pattern.compile("(?<=:).*\\b\\w+\\s*\\(.*\\)"); // matches "methodName(...)" anywhere after a colon
     private final String RULE_NAME = "No Method Calls In Descriptions Rule";
     private final String RULE_DESCRIPTION = "No method calls in descriptions. " +
-            "instead of ```StringBuilder-->>Person: Return toString() result``` use ```StringBuilder-->>Person: Return toString result```";
+            "instead of ```StringBuilder-->>Person: Return toString() result``` use ```StringBuilder-->>Person: Return toString result``` \n" +
+            "instead of NO ```EmployeeService->>EmployeeRepo: updateEmployeeManager()``` use  YES ```EmployeeService->>EmployeeRepo: update Employee's Manager``` \n";
 
     @Override
     public RuleResult check(String line, int lineNumber) {

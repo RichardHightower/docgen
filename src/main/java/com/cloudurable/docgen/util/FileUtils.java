@@ -13,7 +13,7 @@ public class FileUtils {
     public static void writeFile(java.io.File file, String content) {
         try {
             java.nio.file.Files.writeString(file.toPath(), content);
-        } catch (java.io.IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

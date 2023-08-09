@@ -41,7 +41,10 @@ public class DataClassesAndPrimitiveRule implements LineRule {
             return RuleResult.SUCCESS;
         }
 
-        final  Matcher matcher = PATTERN.matcher(line);
+        String[] split = line.split(":");
+        String interaction = split.length > 1 ? split[0] : line;
+
+        final  Matcher matcher = PATTERN.matcher(interaction);
 
 
 

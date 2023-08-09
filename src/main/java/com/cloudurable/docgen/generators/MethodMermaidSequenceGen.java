@@ -78,7 +78,7 @@ public class MethodMermaidSequenceGen {
     }
 
     public String generateSequenceFromMethod(String javaMethodSource, String methodName, String className, String packageName,
-                                             Consumer<String> consumer) {
+                                             Consumer<String> promptConsumer, Consumer<String> responseConsumer) {
 
         final var ruleRunner = buildRuleRunner();
         final var title = methodName + " (" + className + ")";
@@ -97,12 +97,12 @@ public class MethodMermaidSequenceGen {
         final var instructionMessage = Message.builder().role(Role.USER).content(instruction).build();
 
         promptBuilder.append(convertMessageToMarkdown(instructionMessage));
-        consumer.accept(promptBuilder.toString());
+        promptConsumer.accept(promptBuilder.toString());
 
         final var request = builder.addMessage(instructionMessage).build();
 
 
-        return runValidationFeedbackLoop(javaMethodSource, title, instruction, request, ruleRunner, consumer);
+        return runValidationFeedbackLoop(javaMethodSource, title, instruction, request, ruleRunner, promptConsumer, responseConsumer);
     }
 
 
@@ -113,7 +113,8 @@ public class MethodMermaidSequenceGen {
     }
 
     private String runValidationFeedbackLoop(String javaMethodSource, String title, String instruction,
-                                             ChatRequest request, RuleRunner ruleRunner, Consumer<String> consumer) {
+                                             ChatRequest request, RuleRunner ruleRunner, Consumer<String> promptConsumer,
+                                             Consumer<String> responseConsumer) {
         for (int i = 0; i < 5; i++) {
             final var chatResponse = client.chat(request);
             if (chatResponse.getException().isPresent()) {
@@ -127,21 +128,22 @@ public class MethodMermaidSequenceGen {
                 final var response = chatResponse.getResponse().get();
                 final var chatChoice = response.getChoices().get(0);
                 final var original = chatChoice.getMessage().getContent();
-                consumer.accept("----\n# ORIGINAL RESPONSE \n" + original);
+                promptConsumer.accept("----\n# ORIGINAL RESPONSE \n" + original);
                 final var mermaidDiagram = extractSequenceDiagram(original);
-                return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner,  consumer);
+                return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner, 3, promptConsumer, responseConsumer);
             }
         }
         return "";
     }
 
     private String validateMermaid(String javaMethodSource, String mermaidDiagram, String title,
-                                   RuleRunner ruleRunner, Consumer<String> consumer) {
-        return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner,3, consumer);
+                                   RuleRunner ruleRunner,  Consumer<String> promotConsumer, Consumer<String> responseConsumer) {
+        return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner,3, promotConsumer, responseConsumer);
     }
 
     private String validateMermaid(String javaMethodSource, final String originalMermaidDiagram, String title,
-                                   RuleRunner ruleRunner, int count, Consumer<String> consumer) {
+                                   RuleRunner ruleRunner, int count, Consumer<String> promotConsumer,
+                                   Consumer<String> responseConsumer) {
 
         if (count <= 0) {
             return originalMermaidDiagram;
@@ -173,7 +175,7 @@ public class MethodMermaidSequenceGen {
 
 
             promptBuilder.append(convertMessageToMarkdown(fixMessage));
-            consumer.accept(promptBuilder.toString());
+            promotConsumer.accept(promptBuilder.toString());
 
             final var fixRequest = builder.addMessage(fixMessage).build();
 
@@ -192,9 +194,10 @@ public class MethodMermaidSequenceGen {
                 final var response = fixMermaidResponse.getResponse().get();
                 final var chatChoice = response.getChoices().get(0);
                 final var original = chatChoice.getMessage().getContent();
-                consumer.accept("----\n# FIX RAW RESPONSE " + count + "\n" + original);
+                responseConsumer.accept("----\n# FIX RAW RESPONSE " + count + "\n" + original);
                 final var mermaidDiagram = extractSequenceDiagram(original);
-                return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner, count - 1, consumer);
+                return validateMermaid(javaMethodSource, mermaidDiagram, title, ruleRunner, count - 1,
+                        promotConsumer, responseConsumer);
             } else {
                 return originalMermaidDiagram;
             }

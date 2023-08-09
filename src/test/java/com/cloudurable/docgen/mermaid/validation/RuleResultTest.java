@@ -31,12 +31,16 @@ class RuleResultTest {
                 .description("Violation Description")
                 .build();
 
-        String expectedJson = "{"
-                + "\"lineNumber\":10,"
-                + "\"violatedLine\":\"Line violated\","
-                + "\"ruleName\":\"Rule 1\","
-                + "\"description\":\"Violation Description\""
-                + "}";
+        String expectedJson = "{\n" +
+                "    \"lineNumber\": 10\n" +
+                ",\n" +
+                "    \"violatedLine\": \"Line violated\"\n" +
+                ",\n" +
+                "    \"ruleName\": \"Rule 1\"\n" +
+                ",\n" +
+                "    \"description\": \"Violation Description\"\n" +
+                "\n" +
+                "}";
         assertEquals(expectedJson, ruleResult.serialize());
     }
 }

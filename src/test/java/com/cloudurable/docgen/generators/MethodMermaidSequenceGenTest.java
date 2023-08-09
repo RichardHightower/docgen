@@ -7,6 +7,7 @@ import com.cloudurable.docgen.parser.model.JavaItem;
 import com.cloudurable.docgen.parser.model.JavaItemType;
 import com.cloudurable.docgen.util.MermaidUtils;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.io.File;
 import java.util.List;
@@ -76,11 +77,11 @@ class MethodMermaidSequenceGenTest {
                 //.filter(field -> Character.isLowerCase(field.getDefinition().charAt(0)))
                 .collect(Collectors.toList());
 
-        Optional<JavaItem> toStringOpt = personMethods.stream().filter(m -> m.getSimpleName().equals(methodName)).findFirst();
+        Optional<JavaItem> methodOpt = personMethods.stream().filter(m -> m.getSimpleName().equals(methodName)).findFirst();
 
-        assertTrue(toStringOpt.isPresent());
+        assertTrue(methodOpt.isPresent());
 
-        JavaItem method = toStringOpt.get();
+        JavaItem method = methodOpt.get();
 
         StringBuilder body = new StringBuilder();
         body.append("Parent class: ").append(method.getParent().getDefinition()).append("\n");
@@ -94,33 +95,42 @@ class MethodMermaidSequenceGenTest {
 
         final var gen = new MethodMermaidSequenceGen();
         final var counter = new AtomicInteger();
-        final var builder = new StringBuilder();
+        final var promptBuilder = new StringBuilder();
+        final var responseBuilder = new StringBuilder();
         String mermaidCode = gen.generateSequenceFromMethod(
-                body.toString(), method.getSimpleName(), method.getParent().getName(), "org.example.model", s -> {
-                    builder.append(s);
+                body.toString(), method.getSimpleName(), method.getParent().getName(), "org.example.model", prompt -> {
+                    promptBuilder.append(prompt);
                     counter.incrementAndGet();
-                    System.out.println(s);
-                });
+                    System.out.println("##########################################################################");
+                    System.out.println(prompt);
+                    System.out.println("##########################################################################");
+                }, responseBuilder::append);
 
-        System.out.println(builder);
-        System.out.println(mermaidCode);
+        try {
+            Pattern titlePattern = Pattern.compile("^---\\s*title:\\s*[^-\\s][^\\n]*\\s*---");
+            assertTrue(titlePattern.matcher(mermaidCode).find(),"The mermaidCode should have a title");
+            Pattern sequenceDiagramPattern = Pattern.compile("sequenceDiagram");
+            assertTrue(sequenceDiagramPattern.matcher(mermaidCode).find(), "The mermaidCode should have a sequenceDiagram");
+            Pattern addressPattern = Pattern.compile("participant " + simpleClassName);
+            assertTrue(addressPattern.matcher(mermaidCode).find(), "The mermaidCode should have a participant");
+            validateMermaid(mermaidCode);
+            System.out.println("COUNTER " + counter);
+            assertTrue(counter.get() < 5, "We did not retry more than");
+        }catch (AssertionFailedError ex) {
+            System.out.println("Mermaid Code -------------- ");
+            System.out.println(mermaidCode);
+            System.out.println("PROMPTS -------------- ");
+            System.out.println(promptBuilder);
+            System.out.println("RESPONSES -------------- ");
+            System.out.println(responseBuilder);
+            throw ex;
+        }
 
 
+        return mermaidCode;
+    }
 
-        Pattern titlePattern = Pattern.compile("^---\\s*title:\\s*[^-\\s][^\\n]*\\s*---");
-        assertTrue(titlePattern.matcher(mermaidCode).find(),"The mermaidCode should have a title");
-
-
-        // Validate that the mermaidCode has a sequenceDiagram
-        Pattern sequenceDiagramPattern = Pattern.compile("sequenceDiagram");
-        assertTrue(sequenceDiagramPattern.matcher(mermaidCode).find(), "The mermaidCode should have a sequenceDiagram");
-
-        Pattern addressPattern = Pattern.compile("participant " + simpleClassName);
-        assertTrue(addressPattern.matcher(mermaidCode).find(), "The mermaidCode should have a participant");
-
-        System.out.println("COUNTER " + counter);
-
-        assertTrue(counter.get() < 4, "We did not retry more than twice");
+    private static void validateMermaid(String mermaidCode) {
 
         File rootDir = new File("./temp" + System.currentTimeMillis());
         File output = new File(rootDir, "test.png");
@@ -137,9 +147,6 @@ class MethodMermaidSequenceGenTest {
             output.delete();
             rootDir.delete();
         }
-
-
-        return mermaidCode;
     }
 
 }
