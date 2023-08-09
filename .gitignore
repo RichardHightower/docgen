@@ -1,0 +1,14 @@
+.gradle/
+.idea/
+build/
+.DS_Store
+test.txt
+./output
+./out
+./config/
+config/
+
+
+
+
+
