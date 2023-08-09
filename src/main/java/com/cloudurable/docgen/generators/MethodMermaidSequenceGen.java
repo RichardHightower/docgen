@@ -3,6 +3,7 @@ package com.cloudurable.docgen.generators;
 import com.cloudurable.docgen.util.FileUtils;
 import com.cloudurable.docgen.mermaid.validation.*;
 import com.cloudurable.docgen.mermaid.validation.sequence.*;
+import com.cloudurable.docgen.util.MermaidUtils;
 import com.cloudurable.jai.OpenAIClient;
 import com.cloudurable.jai.model.text.completion.chat.ChatRequest;
 import com.cloudurable.jai.model.text.completion.chat.Message;
@@ -51,7 +52,9 @@ public class MethodMermaidSequenceGen {
         rules.add(new ParticipantAliasRule());
         rules.add(new SystemOutRule());
         rules.add(new DataClassesAndPrimitiveRule());
-        ruleRunner = RuleRunner.builder().rules(rules).build();
+
+        ruleRunner = RuleRunner.builder().contentRules(List.of(new TitleRequiredRule(), MermaidUtils.createRule()))
+                .rules(rules).build();
         return ruleRunner;
     }
 
