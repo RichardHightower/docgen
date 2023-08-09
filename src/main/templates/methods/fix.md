@@ -27,7 +27,7 @@
 * Always add a title.
 
 
-# Fix Instructions
+# Instructions To Fix Mermaid Sequence Diagram
 You just generated a broken mermaid diagram. The mermaid code and validation errors are included below.
 Regenerate a mermaid sequence diagram based on the above guidelines titled {{TITLE}} using the Java code below by
 following the instructions below:
@@ -42,6 +42,10 @@ following the instructions below:
    * Ensure there are no method calls in the interaction description, just plain English.
    * Ensure that all `alt`/`else` have a corresponding `end`. 
    * Ensure that all `critical`/`option` have a corresponding `end`.
+   * Describe descriptions of `alt`/`else`/`end`, `critical`/`option`/`end` in plain English
+     - IMPORTANT: `alt` always has one or more `else` and a matching `end`
+     - IMPORTANT: `critical` always has one or more `option` and a matching `end`
+     - IMPORTANT: `loop` always has a matching `end`
 6. `Interaction After Fix`: Show the list of interaction with any fixes applied from the `Validation Fixes` section.
 7. `Final Participants`: Show the list of participants from `Participants After Fix` with participants removed if participant is not used in `Interaction After Fix` .
 8. `Plain English Title`: Create a plain English title based on  "{{TITLE}}".
@@ -110,3 +114,4 @@ sequenceDiagram
     {{Final Participants}}
     {{Clean Interactions}}
 ```
+End of instructions.
