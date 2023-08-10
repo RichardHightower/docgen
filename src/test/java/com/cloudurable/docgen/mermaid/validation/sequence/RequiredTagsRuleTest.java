@@ -26,7 +26,7 @@ public class RequiredTagsRuleTest {
 
         RuleResult result = rule.check(content);
         assertEquals("Required Tags", result.getRuleName());
-        assertEquals("for `alt` must have at least one `else`", result.getDescription());
+        assertEquals(RequiredTagsRule.ALT_TAG_RULES, result.getDescription());
     }
 
     @Test
@@ -38,7 +38,7 @@ public class RequiredTagsRuleTest {
 
         RuleResult result = rule.check(content);
         assertEquals("Required Tags", result.getRuleName());
-        assertEquals("for `critical` must have at least one `option`", result.getDescription());
+        assertEquals(RequiredTagsRule.CRITICAL_TAG_RULES, result.getDescription());
     }
 
     @Test
@@ -123,8 +123,177 @@ public class RequiredTagsRuleTest {
                 "end";
 
         RuleResult result = rule.check(content);
-        assertEquals("for `alt` must have at least one `else`", result.getDescription());
+        assertEquals(RequiredTagsRule.ALT_TAG_RULES, result.getDescription());
         assertEquals("Required Tags", result.getRuleName());
     }
+
+
+    @Test
+    public void testBugOptWithElse() {
+        final var content = "---\n" +
+                "title: Run Image Generation Check\n" +
+                "---\n" +
+                "\n" +
+                "sequenceDiagram\n" +
+                "    participant RerunImages\n" +
+                "    participant Directory\n" +
+                "    participant Console\n" +
+                "    participant System\n" +
+                "    participant Set\n" +
+                "    participant MermaidFile\n" +
+                "    participant ImageFile\n" +
+                "    \n" +
+                "    RerunImages->>Directory: Create \"mermaid\" directory\n" +
+                "    RerunImages->>Directory: Create \"images\" directory\n" +
+                "    Directory->>Directory: List files in \"images\" directory\n" +
+                "    Directory->>Directory: List files in \"mermaid\" directory\n" +
+                "    opt mermaidFileArray is null\n" +
+                "        Directory->>Console: Print \"No mermaid files yet\"\n" +
+                "        Console->>System: Exit with status 2\n" +
+                "    else mermaidFileArray is not null\n" +
+                "        System->>Console: Print \"Total mermaid files\"\n" +
+                "        Directory->>Set: Extract file names\n" +
+                "        opt imageFileArray is null\n" +
+                "            Set->>Set: Create empty imageFiles set\n" +
+                "        else imageFileArray is not null\n" +
+                "            Directory->>Set: Extract file names\n" +
+                "        end\n" +
+                "    end\n" +
+                "    opt imageFiles size is not equal to mermaidFiles size\n" +
+                "        System->>Console: Print \"Total mermaid files\"\n" +
+                "        System->>Console: Print \"Sizes not equal\"\n" +
+                "        Set->>Set: Remove common files from mermaidFiles\n" +
+                "        System->>Console: Print \"Missing images\"\n" +
+                "        Set->>Console: Print missing image file names\n" +
+                "        Set->>Console: Print \"Re-running files\"\n" +
+                "        Set->>MermaidFile: Retrieve the corresponding mermaid file\n" +
+                "        Set->>ImageFile: Retrieve the corresponding image file\n" +
+                "        ImageFile->>RerunImages: Re-run the mermaid file and save as the image file\n" +
+                "    end";
+
+        RuleResult result = rule.check(content);
+        assertEquals(RequiredTagsRule.OPT_ELSE_RULE, result.getDescription());
+        assertEquals("Required Tags", result.getRuleName());
+
+
+    }
+
+    @Test
+    public void testHasElseButNoEnd() {
+        var contents = "---\n" +
+                "title: parseFile\n" +
+                "---\n" +
+                "\n" +
+                "sequenceDiagram\n" +
+                "    participant ClassVisitorParser\n" +
+                "    participant File\n" +
+                "    participant Exception\n" +
+                "    participant CompilationUnit\n" +
+                "\n" +
+                "    ClassVisitorParser->>File: run()\n" +
+                "    alt Exception is thrown\n" +
+                "        File->>ClassVisitorParser: throw Exception\n" +
+                "        ClassVisitorParser->>Exception: printStacktrace()\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Handle Exception\n" +
+                "        ClassVisitorParser->>CompilationUnit: Indicate Error\n" +
+                "        CompilationUnit->>CompilationUnit: Handle Error\n" +
+                "        CompilationUnit->>ClassVisitorParser: Report Error\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Cleanup\n" +
+                "        ClassVisitorParser->>File: Indicate Failed Parsing\n" +
+                "    else Exception is not thrown\n" +
+                "        File-->>ClassVisitorParser: Return Result\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Handle Result\n" +
+                "        ClassVisitorParser->>CompilationUnit: Process CompilationUnit\n" +
+                "        CompilationUnit->>ClassVisitorParser: Return Status\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Indicate Success\n" +
+                "\n";
+
+        RuleResult result = rule.check(contents);
+        assertEquals("Required Tags", result.getRuleName());
+
+        assertEquals("`alt` without corresponding `end`", result.getDescription());
+
+
+    }
+
+
+
+    @Test
+    public void testCriticalHasElse() {
+        var contents = "---\n" +
+                "title: parseFile\n" +
+                "---\n" +
+                "\n" +
+                "sequenceDiagram\n" +
+                "    participant ClassVisitorParser\n" +
+                "    participant File\n" +
+                "    participant Exception\n" +
+                "    participant CompilationUnit\n" +
+                "\n" +
+                "    ClassVisitorParser->>File: run()\n" +
+                "    critical Exception is thrown\n" +
+                "        File->>ClassVisitorParser: throw Exception\n" +
+                "        ClassVisitorParser->>Exception: printStacktrace()\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Handle Exception\n" +
+                "        ClassVisitorParser->>CompilationUnit: Indicate Error\n" +
+                "        CompilationUnit->>CompilationUnit: Handle Error\n" +
+                "        CompilationUnit->>ClassVisitorParser: Report Error\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Cleanup\n" +
+                "        ClassVisitorParser->>File: Indicate Failed Parsing\n" +
+                "    else Exception is not thrown\n" +
+                "        File-->>ClassVisitorParser: Return Result\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Handle Result\n" +
+                "        ClassVisitorParser->>CompilationUnit: Process CompilationUnit\n" +
+                "        CompilationUnit->>ClassVisitorParser: Return Status\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Indicate Success\n" +
+                "\n";
+
+        RuleResult result = rule.check(contents);
+        assertEquals("Required Tags", result.getRuleName());
+
+        assertEquals(RequiredTagsRule.CRITICAL_ELSE_RULE, result.getDescription());
+
+
+    }
+
+
+    @Test
+    public void testAltHasOption() {
+        var contents = "---\n" +
+                "title: parseFile\n" +
+                "---\n" +
+                "\n" +
+                "sequenceDiagram\n" +
+                "    participant ClassVisitorParser\n" +
+                "    participant File\n" +
+                "    participant Exception\n" +
+                "    participant CompilationUnit\n" +
+                "\n" +
+                "    ClassVisitorParser->>File: run()\n" +
+                "    alt Exception is thrown\n" +
+                "        File->>ClassVisitorParser: throw Exception\n" +
+                "        ClassVisitorParser->>Exception: printStacktrace()\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Handle Exception\n" +
+                "        ClassVisitorParser->>CompilationUnit: Indicate Error\n" +
+                "        CompilationUnit->>CompilationUnit: Handle Error\n" +
+                "        CompilationUnit->>ClassVisitorParser: Report Error\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Cleanup\n" +
+                "        ClassVisitorParser->>File: Indicate Failed Parsing\n" +
+                "    option Exception is not thrown\n" +
+                "        File-->>ClassVisitorParser: Return Result\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Handle Result\n" +
+                "        ClassVisitorParser->>CompilationUnit: Process CompilationUnit\n" +
+                "        CompilationUnit->>ClassVisitorParser: Return Status\n" +
+                "        ClassVisitorParser->>ClassVisitorParser: Indicate Success\n" +
+                "\n";
+
+        RuleResult result = rule.check(contents);
+        assertEquals("Required Tags", result.getRuleName());
+
+        assertEquals(RequiredTagsRule.ALT_OPTION_RULE, result.getDescription());
+
+
+    }
+
 
 }

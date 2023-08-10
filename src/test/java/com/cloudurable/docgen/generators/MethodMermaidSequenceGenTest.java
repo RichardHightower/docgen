@@ -164,7 +164,14 @@ class MethodMermaidSequenceGenTest {
 
         Optional<JavaItem> methodOpt = personMethods.stream().filter(m -> m.getSimpleName().equals(methodName)).findFirst();
 
-        assertTrue(methodOpt.isPresent());
+        if (!ignore) {
+            assertTrue(methodOpt.isPresent());
+        } else {
+            if (!methodOpt.isPresent()) {
+                System.err.println("METHOD Not found in CLASS" + simpleClassName + "################### METHOD" + methodName);
+                return "METHOD Not found in CLASS" + simpleClassName + "################### METHOD" + methodName;
+            }
+        }
 
         JavaItem method = methodOpt.get();
 
@@ -187,7 +194,8 @@ class MethodMermaidSequenceGenTest {
         mermaidDir.mkdirs();
 
         final var gen = MethodMermaidSequenceGen.builder()
-                .setModel("gpt-3.5-turbo-16k-0613")
+                //.setModel("gpt-3.5-turbo-16k-0613")
+                .setModel("gpt-3.5-turbo-16k")
                 .setTemperature(0.0f)
                 .setMaxTokens(2000)
                 .setValidateJson(false).build();

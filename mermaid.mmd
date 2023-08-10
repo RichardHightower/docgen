@@ -1,20 +1,23 @@
 ---
-title: Content Validation
+title: Validate Mermaid
 ---
 
 sequenceDiagram
-    participant ContentValidator
-    participant RuleEngine
-    participant RuleEvaluator
-    participant RuleProcessor
-    participant LoggingService
+    participant PackageMermaidClassDiagramGen
+    participant OpenAIClient
+    participant List~Message~
+    participant Message
+    participant RetryCondition
 
-    ContentValidator->>RuleEngine: Get Rules
-
-    alt Rule list is not empty
-        ContentValidator->>RuleEvaluator: Evaluate Rule against content
-        RuleEvaluator-->>ContentValidator: Return RuleResult
-        ContentValidator-->>RuleProcessor: Process RuleResult
-    else Rule list is empty
-        ContentValidator->>LoggingService: Log empty Rule list
+    PackageMermaidClassDiagramGen->>OpenAIClient: Create OpenAIClient object
+    PackageMermaidClassDiagramGen->>List~Message~: Create empty context list
+    PackageMermaidClassDiagramGen->>Message: Validate Mermaid diagram
+    PackageMermaidClassDiagramGen->>Message: Override validateMermaid method
+    PackageMermaidClassDiagramGen->>Message: Validate Mermaid diagram with retry
+    Message-->>Message: Return the validated Mermaid diagram string
+    opt Retry Condition
+        PackageMermaidClassDiagramGen->>RetryCondition: Check if retry is greater than 0
+        RetryCondition-->>RetryCondition: Return the result of the comparison
+        RetryCondition-->>RetryCondition: Handle retry condition
+        PackageMermaidClassDiagramGen->>Message: Validate Mermaid diagram with retry
     end

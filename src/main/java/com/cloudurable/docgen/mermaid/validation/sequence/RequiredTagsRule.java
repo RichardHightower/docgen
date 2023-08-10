@@ -7,6 +7,22 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RequiredTagsRule implements ContentRule {
+    public static final String ALT_TAG_RULES ="The `alt` tag must have at least one `else` and an `end`.\nIf you do not have at lease one `else` then use `opt`/`end` instead.";
+    public static final String CRITICAL_TAG_RULES = "The `critical` tag must have at least one `option` and an `end`.";
+
+    public static final String LOOP_ELSE_RULE = "The `loop` tag cannot have an `else` tag";
+    public static final String OPT_ELSE_RULE = "The `opt` tag cannot have an `else` tag." +
+            "\nIf you need an `else`, then use `alt`/`else`/`end` tags instead.";
+
+    public static final String CRITICAL_ELSE_RULE = "The `critical` tag cannot have an `else` tag. " +
+            "Try using `option` with `critical` as in  `critical`/`option`/`end` ";
+
+    public static final String LOOP_OPTION_RULE = "The `loop` tag cannot have an `option` tag";
+    public static final String OPT_OPTION_RULE =  "The `opt` tag cannot have an `option` tag." +
+            "\nIf you need an `option`, then use `critical`/`option`/`end` tags instead.";
+
+    public static final String ALT_OPTION_RULE = "The `alt` tag cannot have an `option` tag. " +
+            "Try using `else` with `alt` as in  `alt`/`else`/`end` ";
 
     @Override
     public RuleResult check(String content) {
@@ -28,32 +44,77 @@ public class RequiredTagsRule implements ContentRule {
                 optionElseCountStack.push(new AtomicInteger());
             } else if (line.startsWith("loop")) {
                 tagStack.push("loop");
-            } else if (line.startsWith("opt")) {
-                tagStack.push("opt");
+                optionElseCountStack.push(new AtomicInteger());
             } else if (line.startsWith("else")) {
-                if (!tagStack.isEmpty() && "alt".equals(tagStack.peek())) {
-                    optionElseCountStack.peek().incrementAndGet();
+                final var parentTage = !tagStack.isEmpty() ? tagStack.peek() : "";
+
+                if ("alt".equals(parentTage)) {
+                    if (!optionElseCountStack.isEmpty()) {
+                        AtomicInteger peek = optionElseCountStack.peek();
+                        if (peek != null) {
+                            peek.incrementAndGet();
+                        } else {
+                            System.out.println(content);
+                        }
+                    }
                     //tagStack.pop(); do I need this?
                 } else {
-                    return createMismatchError(lineNumber, "unexpected else", line);
+                    switch (parentTage) {
+                        case "opt":
+                            return createMismatchError(lineNumber, OPT_ELSE_RULE, line);
+                        case "loop":
+                            return createMismatchError(lineNumber, LOOP_ELSE_RULE, line);
+                        case "critical":
+                            return createMismatchError(lineNumber, CRITICAL_ELSE_RULE, line);
+                        default:
+                            return createMismatchError(lineNumber, "unexpected `else`", line);
+                    }
+
                 }
             } else if (line.startsWith("option")) {
-                if (!tagStack.isEmpty() && "critical".equals(tagStack.peek())) {
-                    optionElseCountStack.peek().incrementAndGet();
+                final var parentTag = !tagStack.isEmpty() ? tagStack.peek() : "";
+                if ("critical".equals(parentTag)) {
+                    if (!optionElseCountStack.isEmpty()) {
+                        AtomicInteger peek = optionElseCountStack.peek();
+                        if (peek != null) {
+                            peek.incrementAndGet();
+                        } else {
+                            System.out.println(content);
+                        }
+                    }
                     //tagStack.pop(); do I need this?
                 } else {
-                    return createMismatchError(lineNumber, "unexpected option", line);
+                    switch (parentTag) {
+                        case "opt":
+                            return createMismatchError(lineNumber, OPT_OPTION_RULE, line);
+                        case "loop":
+                            return createMismatchError(lineNumber, LOOP_OPTION_RULE, line);
+                        case "alt":
+                            return createMismatchError(lineNumber, ALT_OPTION_RULE, line);
+                        default:
+                            return createMismatchError(lineNumber, "unexpected `option`", line);
+                    }
                 }
+            } else if (line.startsWith("opt")) {
+                tagStack.push("opt");
+                optionElseCountStack.push(new AtomicInteger());
             } else if (line.startsWith("end")) {
                 if (tagStack.isEmpty()) {
                     return createMismatchError(lineNumber, "end without opening tag", line);
                 }
                 String openingTag = tagStack.pop();
-                if (optionElseCountStack.pop().get() < 1) {
+                if (optionElseCountStack.isEmpty()) {
                     if (openingTag.equals("alt")) {
-                        return createMismatchError(lineNumber, "for `alt` must have at least one `else`", line);
+                        return createMismatchError(lineNumber, ALT_TAG_RULES, line);
                     } else if (openingTag.equals("critical")) {
-                        return createMismatchError(lineNumber, "for `critical` must have at least one `option`", line);
+                        return createMismatchError(lineNumber,CRITICAL_TAG_RULES , line);
+                    }
+                }
+                else if (optionElseCountStack.pop().get() < 1) {
+                    if (openingTag.equals("alt")) {
+                        return createMismatchError(lineNumber, ALT_TAG_RULES, line);
+                    } else if (openingTag.equals("critical")) {
+                        return createMismatchError(lineNumber,CRITICAL_TAG_RULES , line);
                     }
                 }
                 if ("end".equals(openingTag)) {
@@ -64,11 +125,11 @@ public class RequiredTagsRule implements ContentRule {
 
         if (!tagStack.isEmpty()) {
             if ("alt".equals(tagStack.peek())) {
-                return createMismatchError(lineNumber, "alt without corresponding else", "");
+                return createMismatchError(lineNumber, "`alt` without corresponding `end`", "");
             } else if ("critical".equals(tagStack.peek())) {
-                return createMismatchError(lineNumber, "critical without corresponding option", "");
+                return createMismatchError(lineNumber, "`critical` without corresponding `end`", "");
             } else {
-                return createMismatchError(lineNumber, tagStack.peek() + " without corresponding end", "");
+                return createMismatchError(lineNumber, "`" +tagStack.peek() + "` without corresponding `end`", "");
             }
         }
 
