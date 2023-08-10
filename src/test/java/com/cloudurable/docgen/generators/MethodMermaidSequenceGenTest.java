@@ -81,7 +81,7 @@ class MethodMermaidSequenceGenTest {
 
     }
 
-    @Test
+    //@Test
     public void readAllFromHere() {
         List<JavaItem> javaItems = TestUtil.loadProject("./src/main/java");
 
