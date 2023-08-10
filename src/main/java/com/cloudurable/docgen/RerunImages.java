@@ -32,8 +32,16 @@ public class RerunImages {
         imagesOutputDir.mkdirs();
 
         File[] imageFileArray = imagesOutputDir.listFiles();
+        File[] mermaidFileArray = mermaidOutputDir.listFiles();
 
-        Set<String> mermaidFiles = Arrays.stream(mermaidOutputDir.listFiles()).map(f -> f.getName()).map(name -> removeExt(name)).collect(Collectors.toSet());
+        if (mermaidFileArray == null) {
+            System.out.println("No mermaid files yet");
+            System.exit(2);
+        }
+
+        System.out.println("Total mermaid files " + mermaidFileArray.length);
+
+        Set<String> mermaidFiles = Arrays.stream(mermaidFileArray).map(f -> f.getName()).map(name -> removeExt(name)).collect(Collectors.toSet());
         Set<String> imageFiles = imageFileArray == null ? Collections.emptySet() : Arrays.stream(imageFileArray).map(f -> f.getName()).map(name -> removeExt(name)).collect(Collectors.toSet());
 
         if (imageFiles.size() != mermaidFiles.size()) {

@@ -2,6 +2,7 @@ package com.cloudurable.docgen.generators;
 
 import com.cloudurable.docgen.Result;
 import com.cloudurable.docgen.TestUtil;
+import com.cloudurable.docgen.parser.model.FieldJavaItem;
 import com.cloudurable.docgen.util.FileUtils;
 import com.cloudurable.docgen.parser.model.JavaItem;
 import com.cloudurable.docgen.parser.model.JavaItemType;
@@ -138,11 +139,16 @@ class MethodMermaidSequenceGenTest {
 
 
         Optional<JavaItem> classOptional = javaItems.stream().filter(javaItem -> javaItem.getType() == JavaItemType.CLASS
-                        || javaItem.getType() == JavaItemType.INTERFACE)
+                        || javaItem.getType() == JavaItemType.INTERFACE  || javaItem.getType() == JavaItemType.ENUM)
                 .filter(clazz -> clazz.getName().endsWith(simpleClassName)).findFirst();
 
         if (!classOptional.isPresent()) {
-            throw new IllegalStateException("Not found " + simpleClassName);
+            if (!ignore) {
+                throw new IllegalStateException("Not found " + simpleClassName);
+            } else {
+                System.err.println("Not found " + simpleClassName + "###################");
+                return "Not found " + simpleClassName + "###################";
+            }
         }
 
         JavaItem parentClass = classOptional.get();
@@ -152,7 +158,8 @@ class MethodMermaidSequenceGenTest {
 
         List<JavaItem> fields  = javaItems.stream().filter(javaItem -> javaItem.getType() == JavaItemType.FIELD)
                 .filter(field -> field.getParent().equals(parentClass))
-                //.filter(field -> Character.isLowerCase(field.getDefinition().charAt(0)))
+                .map(field -> ((FieldJavaItem)  field))
+                .filter(field -> !field.isPrimitive())
                 .collect(Collectors.toList());
 
         Optional<JavaItem> methodOpt = personMethods.stream().filter(m -> m.getSimpleName().equals(methodName)).findFirst();

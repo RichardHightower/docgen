@@ -201,16 +201,38 @@ public class ClassVisitorParser extends VoidVisitorAdapter<Void> {
         final String javaDoc = parts[0];
         final String code = parts[1];
 
+        try {
+            if (field.getVariables().size() > 1) {
+                System.out.println(field.getVariables());
+            }
+            VariableDeclarator variableDeclarator = field.getVariables().get(0);
+            final String fieldType = variableDeclarator.getType().toString();
 
-        JavaItem javaItem = JavaItem.builder()
-                .type(JavaItemType.FIELD)
-                .name(parent.getName() + "." + fieldName(field))
-                .simpleName(fieldName(field))
-                .definition(code)
-                .javadoc(javaDoc)
-                .parent(parent)
-                .build();
-        javaItems.add(javaItem);
+            JavaItem javaItem = JavaItem.builder()
+                    .type(JavaItemType.FIELD)
+                    .fieldType(fieldType)
+                    .primitive(Character.isLowerCase(fieldType.charAt(0)))
+                    .name(parent.getName() + "." + fieldName(field))
+                    .simpleName(fieldName(field))
+                    .definition(code)
+                    .javadoc(javaDoc)
+                    .parent(parent)
+                    .build();
+            javaItems.add(javaItem);
+        } catch (Exception ex) {
+            JavaItem javaItem = JavaItem.builder()
+                    .type(JavaItemType.FIELD)
+                    .fieldType("Unknown")
+                    .primitive(false)
+                    .name(parent.getName() + "." + fieldName(field))
+                    .simpleName(fieldName(field))
+                    .definition(code)
+                    .javadoc(javaDoc)
+                    .parent(parent)
+                    .build();
+            javaItems.add(javaItem);
+        }
+
     }
 
     /**

@@ -24,24 +24,17 @@ public class JavaItem {
     /**
      * Constructs a new Item.
      *
-     * @param importBody  the import statements associated with the item
-     * @param body        the source code body of the item
-     * @param javadoc     the Javadoc documentation of the item
-     * @param name        the fully qualified name of the item
-     * @param simpleName  the simple name of the item
-     * @param definition  the definition of the item
-     * @param parent      the parent item of the current item (e.g., for inner classes)
-     * @param type        the type of the item (e.g., class, method, field)
+     * @param builder  Builder
      */
-    public JavaItem(String importBody, String body, String javadoc, String name, String simpleName, String definition, JavaItem parent, JavaItemType type) {
-        this.importBody = orEmptyString(importBody);
-        this.body = orEmptyString(body);
-        this.javadoc = orEmptyString(javadoc);
-        this.name = orEmptyString(name);
-        this.simpleName = orEmptyString(simpleName);
-        this.definition = orEmptyString(definition);
-        this.parent = parent;
-        this.type = type;
+    public JavaItem(Builder builder) {
+        this.importBody = orEmptyString(builder.importBody);
+        this.body = orEmptyString(builder.body);
+        this.javadoc = orEmptyString(builder.javadoc);
+        this.name = orEmptyString(builder.name);
+        this.simpleName = orEmptyString(builder.simpleName);
+        this.definition = orEmptyString(builder.definition);
+        this.parent = builder.parent;
+        this.type = builder.type;
     }
 
     /**
@@ -160,6 +153,13 @@ public class JavaItem {
      * Builder class for constructing an Item.
      */
     public static class Builder {
+
+        // FIELDS ONLY
+        public String fieldType;
+        public boolean primitive;
+
+        //
+
         private String body;
         private String javadoc;
         private String name;
@@ -212,13 +212,27 @@ public class JavaItem {
             return this;
         }
 
+        public Builder fieldType(String fieldType) {
+            this.fieldType = fieldType;
+            return this;
+        }
+
+        public Builder primitive(boolean primitive) {
+            this.primitive = primitive;
+            return this;
+        }
+
         /**
          * Builds and returns the Item.
          *
          * @return the constructed Item
          */
         public JavaItem build() {
-            return new JavaItem(importBody, body, javadoc, name, simpleName, definition, parent, type);
+            if (type == JavaItemType.FIELD) {
+                return new FieldJavaItem(this);
+            }else {
+                return new JavaItem(this);
+            }
         }
     }
 }

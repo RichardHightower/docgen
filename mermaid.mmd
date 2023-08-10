@@ -1,19 +1,20 @@
 ---
-title: Check Collection for Violation
+title: Content Validation
 ---
 
 sequenceDiagram
-    participant NoCollectionRule
-    participant Pattern
-    participant Matcher
-    participant RuleResult
+    participant ContentValidator
+    participant RuleEngine
+    participant RuleEvaluator
+    participant RuleProcessor
+    participant LoggingService
 
-    NoCollectionRule->>checkCollection: Check collection for violation
-    checkCollection->>Pattern: Create Pattern object with regex
-    checkCollection->>Matcher: Create Matcher object with input
-    checkCollection->>Matcher: Find a match
-    alt Match found
-        checkCollection-->>NoCollectionRule: Return RuleResult object with rule name, line number, violated line, and description
-    else No match found
-        checkCollection-->>NoCollectionRule: Return RuleResult.SUCCESS object
+    ContentValidator->>RuleEngine: Get Rules
+
+    alt Rule list is not empty
+        ContentValidator->>RuleEvaluator: Evaluate Rule against content
+        RuleEvaluator-->>ContentValidator: Return RuleResult
+        ContentValidator-->>RuleProcessor: Process RuleResult
+    else Rule list is empty
+        ContentValidator->>LoggingService: Log empty Rule list
     end
