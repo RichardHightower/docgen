@@ -4,14 +4,29 @@
 
 ```java
 
-{{JAVA_CODE}}
+@Service
+public class HRService 
+
+
+fields:
+	private final HRRepo repo;
+	private final WorkflowService workflow;
+	private final Logger logger 
+
+---
+
+public class WorkflowService 
+
+
+fields:
+	
 
 ```
 
 
 # Instruction
 
-## Create a ***Plain English Title*** for the diagram based on {{TITLE}} and overview of classes
+## Create a ***Plain English Title*** for the diagram based on Package org.example.service and overview of classes
 (markdown)
 
 ## **Class Details List** : List the classes, abstract classes, interfaces and enums with a sublist of their annotations and fields

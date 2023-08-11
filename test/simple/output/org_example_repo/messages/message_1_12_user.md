@@ -4,14 +4,34 @@
 
 ```java
 
-{{JAVA_CODE}}
+public interface HRRepo extends Repo<Employee, String> 
+
+
+fields:
+	
+
+---
+
+public interface Repo<T, ID> 
+
+
+fields:
+	
+
+---
+
+public class HRRepoException extends RuntimeException 
+
+
+fields:
+	
 
 ```
 
 
 # Instruction
 
-## Create a ***Plain English Title*** for the diagram based on {{TITLE}} and overview of classes
+## Create a ***Plain English Title*** for the diagram based on Package org.example.repo and overview of classes
 (markdown)
 
 ## **Class Details List** : List the classes, abstract classes, interfaces and enums with a sublist of their annotations and fields

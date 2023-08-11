@@ -4,14 +4,66 @@
 
 ```java
 
-{{JAVA_CODE}}
+public class Manager 
+
+
+fields:
+	private final Employee manager;
+	private final List<Employee> employees;
+
+---
+
+public class Customer extends Person 
+
+
+fields:
+	private final boolean elite;
+
+---
+
+public class Department 
+
+
+fields:
+	private final Manager manager;
+
+---
+
+public class Address 
+
+
+fields:
+	private final String street;
+	private final String town;
+	private final String country;
+	private final String postalCode;
+
+---
+
+public class Person 
+
+
+fields:
+	private final String firstName;
+	private final String lastName;
+	private final String workEmail;
+	private final String email;
+	private final Address address;
+
+---
+
+public class Employee extends Person 
+
+
+fields:
+	private final boolean newHire;
 
 ```
 
 
 # Instruction
 
-## Create a ***Plain English Title*** for the diagram based on {{TITLE}} and overview of classes
+## Create a ***Plain English Title*** for the diagram based on Package org.example.model and overview of classes
 (markdown)
 
 ## **Class Details List** : List the classes, abstract classes, interfaces and enums with a sublist of their annotations and fields

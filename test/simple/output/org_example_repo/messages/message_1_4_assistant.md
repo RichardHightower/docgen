@@ -3,15 +3,27 @@
 ## Java code
 
 ```java
+public interface Loggable { }
 
-{{JAVA_CODE}}
+public interface Repository<T> { }
 
+public abstract class BaseService<T> implements Loggable { }
+
+public interface UserService extends Repository<User> { }
+
+public class UserRepository implements Repository<User> { }
+
+public class UserServiceImpl extends BaseService<User> implements UserService { }
+
+public class User {
+    private String username;
+    private String password;
+}
 ```
-
 
 # Instruction
 
-## Create a ***Plain English Title*** for the diagram based on {{TITLE}} and overview of classes
+## Create a ***Plain English Title*** for the diagram based on Package org.example.service and overview of classes
 (markdown)
 
 ## **Class Details List** : List the classes, abstract classes, interfaces and enums with a sublist of their annotations and fields

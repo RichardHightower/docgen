@@ -2,14 +2,48 @@
 
 ## Broken Mermaid code 
 ```
-{{MERMAID}}
+---
+title: Class Diagram for org.example.repo Package
+---
+classDiagram
+  class HRRepo {
+    <<interface>>
+  }
+  class Repo {
+    <<interface>>
+  }
+  class HRRepoException extends RuntimeException {
+  }
+  HRRepo -->|extends| Repo
+  HRRepoException -->|extends| RuntimeException
+
 ```
 
 ## Java code
 
 ```java
 
-{{JAVA_CODE}}
+public interface HRRepo extends Repo<Employee, String> 
+
+
+fields:
+	
+
+---
+
+public interface Repo<T, ID> 
+
+
+fields:
+	
+
+---
+
+public class HRRepoException extends RuntimeException 
+
+
+fields:
+	
 
 ```
 
@@ -19,7 +53,18 @@
 
 ```javascript 
 
-{{JSON}}
+[
+    {
+        "lineNumber": 0
+,
+        "violatedLine": ""
+,
+        "ruleName": "MermaidImageGen"
+,
+        "description": "mermaid image generator failed \n\nError: Evaluation failed: Error: Lexical error on line 10. Unrecognized text.\n...n {  }  HRRepo -->|extends| Repo  HRR\n---------------------^\n   "
+
+    }
+]
 
 ```
 
@@ -33,7 +78,7 @@
 ## ***Description of Fixes Validation Issues***: Describe Validation Issues From `Validation JSON` in plain English
 (markdown list)
 
-## Create a ***Plain English Title*** for the diagram based on {{TITLE}} and overview of classes
+## Create a ***Plain English Title*** for the diagram based on Package org.example.repo and overview of classes
 (markdown)
 
 ## **Class Details List** : List the classes, abstract classes, interfaces and enums with a sublist of their annotations and fields
