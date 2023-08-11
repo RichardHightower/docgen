@@ -14,9 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.cloudurable.docgen.generators.ClassDiagramByPackageGen.promptFromMessages;
 import static com.cloudurable.docgen.util.Env.getOpenaiApiKey;
 
-public class MethodMermaidSequenceGen {
+public class SequenceDiagramByMethodGen {
 
     private final OpenAIClient client;
     private final List<Message> context = new ArrayList<>();
@@ -27,7 +28,7 @@ public class MethodMermaidSequenceGen {
 
     private final File templateDir = new File("src/main/templates/methods/");
 
-    public  MethodMermaidSequenceGen(Builder builder){
+    public SequenceDiagramByMethodGen(Builder builder){
         this.maxTokens = builder.maxTokens;
         this.model = builder.model;
         this.temperature = builder.temperature;
@@ -98,21 +99,14 @@ public class MethodMermaidSequenceGen {
         final var title = methodName + " (" + className + ")";
         final var builder = requesatBuilder(context);
 
-        final var promptBuilder = new StringBuilder();
 
-        context.forEach(message -> {
-            promptBuilder.append(convertMessageToMarkdown(message));
-        });
 
         final var template = FileUtils.readFile(new File(this.templateDir, "instruct.md"));
         final var instruction = template.replace("{{JAVA_METHOD}}", javaMethodSource)
                 .replace("{{TITLE}}", title);
 
         final var instructionMessage = Message.builder().role(Role.USER).content(instruction).build();
-
-        promptBuilder.append(convertMessageToMarkdown(instructionMessage));
-        promptConsumer.accept(promptBuilder.toString());
-
+        promptConsumer.accept(promptFromMessages(instructionMessage, context));
         final var request = builder.addMessage(instructionMessage).build();
 
 
@@ -121,11 +115,7 @@ public class MethodMermaidSequenceGen {
     }
 
 
-    private static String convertMessageToMarkdown(Message message) {
-        StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("\n# ").append(message.getRole()).append("\n").append(message.getContent()).append("\n---\n");
-        return messageBuilder.toString();
-    }
+
 
     private String runValidationFeedbackLoop(String javaMethodSource, String title, String instruction,
                                              ChatRequest request, RuleRunner ruleRunner, Consumer<String> promptConsumer,
@@ -168,12 +158,7 @@ public class MethodMermaidSequenceGen {
         ChatRequest.Builder builder = requesatBuilder(context);
 
 
-        final var promptBuilder = new StringBuilder();
-        promptBuilder.append("\n# Fix for ").append(count).append(" ").append(title).append("\n\n");
 
-        context.forEach(message -> {
-            promptBuilder.append(convertMessageToMarkdown(message));
-        });
 
         final var templateMermaid = FileUtils.readFile(new File(this.templateDir,"fix.md"));
 
@@ -190,14 +175,11 @@ public class MethodMermaidSequenceGen {
            final var fixMessage = Message.builder().role(Role.USER)
                     .content(fixInstruction).build();
 
-
-            promptBuilder.append(convertMessageToMarkdown(fixMessage));
-            promptConsumer.accept(promptBuilder.toString());
+            promptConsumer.accept(promptFromMessages(fixMessage, context));
 
             final var fixRequest = builder.addMessage(fixMessage).build();
 
             final var fixMermaidResponse = client.chat(fixRequest);
-
 
             if (fixMermaidResponse.getException().isPresent()) {
                 System.out.printf("%s\n", fixRequest);
@@ -259,8 +241,8 @@ public class MethodMermaidSequenceGen {
             return this;
         }
 
-        public MethodMermaidSequenceGen build() {
-            return  new MethodMermaidSequenceGen(this);
+        public SequenceDiagramByMethodGen build() {
+            return  new SequenceDiagramByMethodGen(this);
         }
     }
 

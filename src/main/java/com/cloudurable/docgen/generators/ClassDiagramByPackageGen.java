@@ -16,13 +16,16 @@ import com.cloudurable.jai.model.text.completion.chat.Role;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class PackageMermaidClassDiagramGen {
+import static com.cloudurable.docgen.generators.GenUtils.convertMessageToMarkdown;
+
+public class ClassDiagramByPackageGen {
 
     private final OpenAIClient client;
     private final List<Message> context = new ArrayList<>();
 
-    public  PackageMermaidClassDiagramGen(){
+    public ClassDiagramByPackageGen(){
 
         client = OpenAIClient.builder().validateJson(true).setApiKey(Env.getOpenaiApiKey()).build();
 
@@ -39,8 +42,8 @@ public class PackageMermaidClassDiagramGen {
     }
 
 
-    private static ChatRequest.Builder requesatBuilder(List<Message> context) {
-        return ChatRequest.builder().messages(new ArrayList<>(context))
+    private ChatRequest.Builder requesatBuilder() {
+        return ChatRequest.builder().messages(context)
                 .maxTokens(2000).temperature(0.0f).model("gpt-3.5-turbo-16k-0613");
     }
 
@@ -75,17 +78,29 @@ public class PackageMermaidClassDiagramGen {
         return extractedCode.toString();
     }
 
-    public String generateClassDiagramFromPackage(String packageName, String source) {
+    public String generateClassDiagramFromPackage(String packageName, String source,
+                                                  Consumer<String> promptConsumer,
+                                                  Consumer<String> responseConsumer) {
 
         final var title = "Package " + packageName;
-        final var builder = requesatBuilder(context);
+        final var builder = requesatBuilder();
         final var template = FileUtils.readFile(new File("src/main/templates/classes/instruct.md"));
         final var instruction = template.replace("{{JAVA_CODE}}", source)
                 .replace("{{TITLE}}", title);
-        final var request = builder.addMessage(Message.builder().role(Role.USER).content(instruction).build()).build();
-
-
+        final var instructionMessage = Message.builder().role(Role.USER).content(instruction).build();
+        promptConsumer.accept(promptFromMessages(instructionMessage, context));
+        final var request = builder.addMessage(instructionMessage).build();
         return runMermaidValidationFeedbackLoop(source, title, instruction, request);
+    }
+
+    public static String promptFromMessages(Message instructionMessage, List<Message> context) {
+
+        final var messages = new StringBuilder();
+        String base = String.join("\n----\n",
+                context.stream().map(GenUtils::convertMessageToMarkdown).toArray(String[]::new));
+
+        messages.append(base).append("\n----\n").append(convertMessageToMarkdown(instructionMessage));
+        return messages.toString();
     }
 
     private String runMermaidValidationFeedbackLoop(String source, String title, String instruction, ChatRequest request) {
@@ -121,7 +136,7 @@ public class PackageMermaidClassDiagramGen {
             return mermaidDiagram;
         }
 
-        ChatRequest.Builder builder = requesatBuilder(context);
+        ChatRequest.Builder builder = requesatBuilder();
 
         final var ruleRunner = buildRuleRunner();
 

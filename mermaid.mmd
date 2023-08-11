@@ -1,44 +1,33 @@
 ---
-title: Package org.example.model Class Diagram
+title: Shape Hierarchy and Properties
 ---
-
 classDiagram
-    class Manager{
-        +Person manager
-        +List<Person> employees
+
+    class Shape {
+        <<Interface>>
     }
-    Manager -- Person: manager
-    
-    class Customer{
-        +boolean elite
+
+    class Polygon {
+        <<AbstractClass>>
+        int sides
     }
-    Customer -- Person: extends
-    
-    class Department {
-        +Manager manager
+
+    class Rectangle {
+        double length
+        double width
+        String color
     }
-    Department -- Manager: manager
-    
-    class Address {
-        +String street
-        +String town
-        +String country
-        +String postalCode
+
+    class Circle {
+        double radius
+        String color
     }
-    
-    class Person {
-        +String firstName
-        +String lastName
-        +String workEmail
-        +String email
-        +Address address
+
+    class Triangle {
+        double base
+        double height
     }
-    Person <|-- Customer 
-    Person <|-- Employee
-    
-    class Employee {
-        +boolean newHire
-    }
-    Employee -- Person: extends
-    
-    Address <|-- Person: composition
+
+    Rectangle --|> Polygon
+    Circle ..|> Shape
+    Triangle --|> Polygon

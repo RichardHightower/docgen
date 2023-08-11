@@ -1,12 +1,10 @@
 package com.cloudurable.docgen.generators;
 
-import com.cloudurable.docgen.Result;
 import com.cloudurable.docgen.TestUtil;
 import com.cloudurable.docgen.parser.model.FieldJavaItem;
 import com.cloudurable.docgen.util.FileUtils;
 import com.cloudurable.docgen.parser.model.JavaItem;
 import com.cloudurable.docgen.parser.model.JavaItemType;
-import com.cloudurable.docgen.util.MermaidUtils;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -18,9 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.cloudurable.docgen.TestUtil.validateMermaid;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MethodMermaidSequenceGenTest {
+class SequenceDiagramByMethodGenTest {
 
 
     @Test
@@ -175,25 +174,16 @@ class MethodMermaidSequenceGenTest {
 
         JavaItem method = methodOpt.get();
 
-        StringBuilder body = new StringBuilder();
-        body.append("Parent class:\n").append(method.getParent().getDefinition()).append("\n");
-
-        body.append("Parent Class Fields:\n");
-        for (var field : fields) {
-            body.append("\t").append(field.getDefinition()).append("\n");
-        }
-        body.append("Method Body:\n");
-        body.append(method.getBody());
+        String body = getMethodBody(fields, method);
 
         File methodDir = new File(rootDir, method.getName().replace('.', '_'));
         methodDir.mkdirs();
         File promptDir = new File(methodDir, "prompts");
         File mermaidDir = new File(methodDir, "mermaid");
-
         promptDir.mkdirs();
         mermaidDir.mkdirs();
 
-        final var gen = MethodMermaidSequenceGen.builder()
+        final var gen = SequenceDiagramByMethodGen.builder()
                 //.setModel("gpt-3.5-turbo-16k-0613")
                 .setModel("gpt-3.5-turbo-16k")
                 .setTemperature(0.0f)
@@ -252,23 +242,17 @@ class MethodMermaidSequenceGenTest {
         return mermaidCode;
     }
 
-    private static void validateMermaid(String mermaidCode) {
+    private static String getMethodBody(List<JavaItem> fields, JavaItem method) {
+        StringBuilder body = new StringBuilder();
+        body.append("Parent class:\n").append(method.getParent().getDefinition()).append("\n");
 
-        File rootDir = new File("./temp" + System.currentTimeMillis());
-        File output = new File(rootDir, "test.png");
-        File input = new File(rootDir, "test.mmd");
-
-        try {
-            rootDir.mkdirs();
-            FileUtils.writeFile(input, mermaidCode);
-            Result result = MermaidUtils.runMmdc(input, output);
-            assertEquals(0, result.getResult());
-            assertTrue(output.exists());
-        } finally {
-            input.delete();
-            output.delete();
-            rootDir.delete();
+        body.append("Parent Class Fields:\n");
+        for (var field : fields) {
+            body.append("\t").append(field.getDefinition()).append("\n");
         }
+        body.append("Method Body:\n");
+        body.append(method.getBody());
+        return body.toString();
     }
 
 }

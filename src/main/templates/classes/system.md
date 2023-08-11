@@ -17,23 +17,25 @@ Mermaid Class Diagram
 Your task is to generate a class diagram for each class in the package, showing relationships such as inheritance,
 interface implementation, and aggregation, if any. Please use the following from Mermaid class diagram syntax:
 
+- 
 ## Concise Mermaid Guide for Class Diagrams
-
+- **Always include a title**
 - **Initiate class diagram**: Use `classDiagram`.
 - **Declare a class**: `class ClassName { \n }`.
 - **Abstract class**: Use `class ClassName { \n<<Abstract>>\n }`.
 - **Interface class**: Use `class ClassName { \n<<Interface>>\n }`.
 - **Declare fields inside class**: Add between `{}`, e.g., `class { <fields go here> }` in a new line each.
+- **Composition and association are inferred from fields and their names**: 
+  - List or Set could imply composition, a single instance could imply association. 
+  - Pick best based on context of name and type.
 - Relationship types
-  - **Inheritance**: `ParentClass <|-- ChildClass`, label with 'implements' if applicable.
-  - **Interface implementation**: `Interface <|.. ImplementingClass`.
-  - **Composition**: `Class1 *-- Class2: fieldName`.
-  - **Aggregation**: `Class1 o-- Class2: fieldName`.
-  - **Association**: Use `Class1 --> Class2: fieldName`.
-  - **Solid link**: `Class1 -- Class2: fieldName`.
-  - **Dependency**: `Class1 ..> Class2: fieldName`.
-  - **Realization**: `Class1 ..|> Class2: fieldName`.
-  - **Dashed link**: `Class1 .. Class2: fieldName`.
+  - **Inheritance**: `Animal <|-- Person` or `Person --|> Animal`
+  - **Interface implementation**: `Person <|.. TruckDriver` or `TruckDriver ..|> Person`
+  - **Composition**: `Engine *-- SparkPlugs: plugs`.
+  - **Aggregation**: `Engine o-- Oil: needsOil`.
+  - **Directional Association**: Use `Insurance --> Car: insures`.
+  - **Association Strong**: `Class1 -- Class2: fieldName`.
+  - **Association Weak**: `Class1 .. Class2: fieldName`.
 - Don't use angle brackets <> in a relationship   `Response --> Set<Product>: products` instead use `Response --> Set~Product~: products`
 - Don't put Java annotations @Foo in a relationship   `Response --> @JSON Products : products`
 - Don't include `Object` in a relationship
@@ -49,6 +51,15 @@ interface implementation, and aggregation, if any. Please use the following from
   - If comments are included or other clues can be inferred, please pick the best form of relationship type. 
   - Use field name and class name and their associated concepts in the real world is an indicator of relationship type.
 - Java annotations become Mermaid annotations
+
+- Don't use <> in a relationship
+  - WRONG:`Response --> Set<Product>: products`
+  - CORRECT: `Response "one"--"many"> products : Set of Products`
+- Don't put Java annotations @Foo in a relationship   `Response --> @JSON Products : products`
+- Don't use angle brackets <> in a relationship   `Response --> Set<Product>: products` instead use `Response --> Set~Product~: products`
+- Never use primitives in a relationship. Don't use int, long, short, String, etc.
+- Don't include `Object` in a relationship
+
 ## Examples 
 Each diagram should be preceded by a YAML header specifying the title as follows:
 
@@ -57,9 +68,7 @@ Each diagram should be preceded by a YAML header specifying the title as follows
 title: {{title of the diagram}}
 ---
 classDiagram
-    Customer "1" --> "*" Ticket
-    Student "1" --> "1..*" Course
-    Galaxy --> "many" Star : Contains
+
     class Shape{
         <<interface>>
         noOfVertices
@@ -70,8 +79,13 @@ classDiagram
         GREEN
         BLUE
     }
+    Customer "1" --> "*" Ticket
+    Student "1" --> "1..*" Course
+    Galaxy --> "many" Star : Contains
 
 ```
+
+Note diagram has a title. 
 
 ## Java annotations become Mermaid annotations
 ```java
@@ -93,78 +107,132 @@ classDiagram
 ```
 Notice that the annotation goes inside the class definition.
 
-### Automobile Example showing relationship types in Mermaid
+## Automobile Example showing relationship types in Mermaid
+
+### Java input 
+
+```java
+public interface Vehicle { }
+
+public abstract class Automobile implements Vehicle { }
+
+public class Car extends Automobile {
+    private List<Tire> tires;
+    private Engine engine;
+    private Driver driver;
+}
+
+public class Insurance {
+    private Date issued;
+    private Date expired;
+    private Driver driver;
+    private List<Car> cars;
+}
+
+public class Driver {
+    private License license;
+    private Insurance insurance;
+}
+
+public class License {
+    private Date issued;
+    private Date expired;
+    private Driver driver;
+}
+
+public class Engine {
+    private Oil oil;
+    private Gas gas;
+}
+
+public class Tire { }
+
+public class Oil { }
+
+public class Gas { }
+
+```
+
+### Mermaid output 
 
 ```mermaid 
 ---
 title: Automobile Example showing relationship types in Mermaid
 ---
 classDiagram
-    class Automobile{
-        <<Interface>>
-    }
-    class Car{
-        List<Tire> tires
-        Engine engine
-    }
-    class Insurance{
-        Date issued
-        Date expired
-        Driver driver
-        List<Car> Cars
-    }
-    class Driver{
-        License license
-    }
-    class Road{
-    }
-    class License{
-        Date issued
-        Date expired
-        Driver driver
-    }
+  class Vehicle{
+    <<Interface>>
+  }
+  class Automobile{
+    <<AbstractClass>>
+  }
+  class Car{
+    List<Tire> tires
+    Engine engine
+  }
+  class Insurance{
+    Date issued
+    Date expired
+    Driver driver
+    List<Car> Cars
+  }
+  class Driver{
+    License license
 
-    Car <|.. Automobile: implements
-    Car *-- Engine: has one engine
-    Car <-- Insurance: association
-    Car *-- "4" Tire: composed of four tires
-    Car <-- Driver: associated driver
-    Engine o-- Oil: needs oil
-    Engine o-- Gas: needs gas
-    Driver o-- License: requires license
-    Driver o-- Insurance: requires insurance
-    Road "1" --> "*" Car: has
+  }
+  class License{
+    Date issued
+    Date expired
+    Driver driver
+  }
+
+
+  Automobile ..|> Vehicle: implements
+  Insurance --> "many" Car: insures
+  Engine o-- Oil: needs oil
+  Engine o-- Gas: needs gas
+  Driver o-- License: requires license
+  Driver o-- Insurance: requires insurance
+  Car --|> Automobile: extends
+  Car *-- Engine: has one engine
+  Car *-- "4" Tire: composed of four tires
+  Car --> Driver: associated driver
 
 ```
 ### Explanation of Automobile Example showing relationship types in Mermaid
-All classes are shown in the diagram.
-Automobile is an interface.
-Car is a class that implements the Automobile interface. 
-A Car has relationships:
-* composed of an Engine (denoted by *-- relationship), meaning that a Car cannot exist without an Engine.
-* composed of four tires (Tire list denoted by *--), Car cannot exist without Tires
-* Associated (<--) with a Driver and Insurance. Car can exist without Driver or Insurance, 
 
-Engine has two relationships:
-* Needs Oil and Gas, represented by o--, which an aggregation relationship
-This means that an Engine could technically exist without Oil or Gas, but to function correctly, it requires them.
+### Explanation of the Automobile Example:
 
-Driver requires a License and Insurance, as denoted by the o-- relationship, which is aggregation relationship. 
-Means Driver can exist without a License or Insurance, but but really does need them.
+- **Vehicle**: This is an interface. In Java, this would be declared as `public interface Vehicle { }`.
+- **Automobile**: An abstract class, which is a general class representing all automobiles. 
+  - It realizes the Vehicle interface.
+- **Car**: This is a specific type of Automobile and extends the Automobile abstract class. 
+  - It has the following fields:
+    - `List<Tire> tires`: Indicates that a Car is composed of tires. There are multiple tires, so it's a list.
+    - `Engine engine`: Each car has one engine. This is a composition relationship.
+    - `Driver driver`: Each car is associated with one driver.
+- **Insurance**: Represents car insurance with the following fields:
+  - `Date issued`: The date the insurance was issued.
+  - `Date expired`: The date the insurance will expire.
+  - `Driver driver`: The driver insured.
+  - `List<Car> Cars`: A list of cars that the insurance covers.
+- **Driver**: Represents a person who drives a car. It has fields for their license and insurance.
+- **License**: Represents a driving license. It's associated with a driver.
+- **Engine**: Represents a car engine. It needs oil and gas to function.
 
-Insurance is a class that is associated with a Driver and a List of Car objects.
-License is a class that is associated with a Driver. License is issued to a specific Driver.
+#### Relationships:
+- Automobile realizes the Vehicle interface.
+- Insurance insures multiple Car objects.
+- An Engine requires both oil and gas to operate.
+- A Driver requires both a License and Insurance.
+- A Car is a type of Automobile.
+- A Car has an engine and is composed of four tires. It is also associated with a driver.
 
-Road is a class that has a relationship with Car objects. A Road can have many Cars ("*"), represented by -->.
 
 
 # Instructions 
 
-
 * Please generate 5 example inputs of varying complexity and five sample outputs.
-* Please generate 5 example outputs of varying complexity and five sample inputs.
-
-* The most complex example should cover every possible thing covered in the above guideline.
 
 * Then generate an example with 
   * Motorcycle, Road, Wheels, Helmet, Gloves, Gas, Oil and Driver
@@ -173,7 +241,7 @@ Road is a class that has a relationship with Car objects. A Road can have many C
   * Label relationships as aggregation, association, composition, etc.
 
 * Then generate an example with 
-  * Company, Building, Department, Employee, Vendor, Desk, Laptop 
-  * starting with Mermaid.
+  * Company, Building, Skyscraper, Warehouse, Factory, Department, Employee, Vendor, Desk, Laptop 
+  * Starting with Mermaid then Java.
   * Get all the cardinalities and relationships correct. 
   * Label relationships as aggregation, association, composition, etc.
