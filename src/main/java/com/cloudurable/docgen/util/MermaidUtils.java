@@ -92,14 +92,16 @@ public class MermaidUtils {
 
     public static ContentRule createRule() {
         return content -> {
-            Result validate = validate(content);
-
+            if (content.isBlank()) {
+                return RuleResult.EMPTY_CONTENT;
+            }
+            final Result validate = validate(content);
 
             if (validate.getResult() == 0 && validate.getException() == null) {
                 return RuleResult.SUCCESS;
             } else {
 
-                final var errorParts = validate.getErrors().split("   at te\\.");
+                final var errorParts = validate.getErrors().split(" at ");
                 final var errors = errorParts.length > 1 ? errorParts[0] : validate.getErrors();
                 System.err.println(content + "\n\n\n");
                 return RuleResult.builder().description(

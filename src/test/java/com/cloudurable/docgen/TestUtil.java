@@ -51,6 +51,11 @@ public class TestUtil {
                 ));
     }
 
+    public static Map<String, String> getClassDefsByPackage() {
+        final var javaItems = TestUtil.loadSimpleProject();
+        return TestUtil.mapPackageToClassDefs(javaItems);
+    }
+
     private static Map<String, List<String>> doMapPackageToClassDefs(List<JavaItem> javaItems) {
         Map<String, List<String>> classBasicDefByPackageName = new HashMap<>();
         javaItems.stream()

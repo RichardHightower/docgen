@@ -1,5 +1,6 @@
 package com.cloudurable.docgen.generators;
 
+import com.cloudurable.docgen.mermaid.validation.classes.InterfaceRule;
 import com.cloudurable.docgen.mermaid.validation.sequence.TitleRequiredRule;
 import com.cloudurable.docgen.util.FileUtils;
 import com.cloudurable.docgen.mermaid.validation.*;
@@ -9,9 +10,8 @@ import com.cloudurable.docgen.mermaid.validation.classes.NoPrimitiveOrBasicTypes
 import com.cloudurable.docgen.util.Env;
 import com.cloudurable.docgen.util.MermaidUtils;
 import com.cloudurable.jai.OpenAIClient;
-import com.cloudurable.jai.model.text.completion.chat.ChatRequest;
-import com.cloudurable.jai.model.text.completion.chat.Message;
-import com.cloudurable.jai.model.text.completion.chat.Role;
+import com.cloudurable.jai.model.ClientResponse;
+import com.cloudurable.jai.model.text.completion.chat.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,9 +25,25 @@ public class ClassDiagramByPackageGen {
     private final OpenAIClient client;
     private final List<Message> context = new ArrayList<>();
 
-    public ClassDiagramByPackageGen(){
+    private final int  maxTokens;
+    private final String  model; //
+    private final float temperature;
+    private final boolean validateJson;
 
-        client = OpenAIClient.builder().validateJson(true).setApiKey(Env.getOpenaiApiKey()).build();
+    private final File templateDir = new File("src/main/templates/methods/");
+
+    public ClassDiagramByPackageGen(final Builder builder){
+
+        this.maxTokens = builder.maxTokens;
+        this.model = builder.model;
+        this.temperature = builder.temperature;
+        this.validateJson = builder.validateJson;
+
+
+        client = builder.client == null ?
+                OpenAIClient.builder().validateJson(validateJson)
+                        .setApiKey(Env.getOpenaiApiKey()).build()
+        : builder.client;
 
         final var systemMessage = Message.builder().role(Role.SYSTEM)
                 .content(FileUtils.readFile(new File("src/main/templates/classes/system.md")))
@@ -42,16 +58,19 @@ public class ClassDiagramByPackageGen {
     }
 
 
+
     private ChatRequest.Builder requesatBuilder() {
         return ChatRequest.builder().messages(context)
-                .maxTokens(2000).temperature(0.0f).model("gpt-3.5-turbo-16k-0613");
+                .maxTokens(maxTokens).temperature(temperature).model(model);
+
+        //"gpt-3.5-turbo-16k-0613"
     }
 
     private static RuleRunner buildRuleRunner() {
         RuleRunner ruleRunner;
         ruleRunner = RuleRunner.builder().contentRules(List.of(new TitleRequiredRule(), MermaidUtils.createRule()))
 
-                .rules(List.of(new NoCollectionRule(), new NoPrimitiveOrBasicTypesRule(), new NoArrayRule()))
+                .rules(List.of(new NoCollectionRule(), new NoPrimitiveOrBasicTypesRule(), new NoArrayRule(), new InterfaceRule()))
                 .build();
         return ruleRunner;
     }
@@ -79,6 +98,7 @@ public class ClassDiagramByPackageGen {
     }
 
     public String generateClassDiagramFromPackage(String packageName, String source,
+                                                  Consumer<Message> messageListener,
                                                   Consumer<String> promptConsumer,
                                                   Consumer<String> responseConsumer) {
 
@@ -88,9 +108,11 @@ public class ClassDiagramByPackageGen {
         final var instruction = template.replace("{{JAVA_CODE}}", source)
                 .replace("{{TITLE}}", title);
         final var instructionMessage = Message.builder().role(Role.USER).content(instruction).build();
+        context.forEach(messageListener);
+        messageListener.accept(instructionMessage);
         promptConsumer.accept(promptFromMessages(instructionMessage, context));
         final var request = builder.addMessage(instructionMessage).build();
-        return runMermaidValidationFeedbackLoop(source, title, instruction, request);
+        return runMermaidValidationFeedbackLoop(source, title, instruction, request, messageListener, promptConsumer, responseConsumer);
     }
 
     public static String promptFromMessages(Message instructionMessage, List<Message> context) {
@@ -103,7 +125,11 @@ public class ClassDiagramByPackageGen {
         return messages.toString();
     }
 
-    private String runMermaidValidationFeedbackLoop(String source, String title, String instruction, ChatRequest request) {
+    private String runMermaidValidationFeedbackLoop(String source, String title, String instruction,
+                                                    ChatRequest request,
+                                                    Consumer<Message> messageListener,
+                                                    Consumer<String> promptConsumer,
+                                                    Consumer<String> responseConsumer) {
         for (int i = 0; i < 5; i++) {
             final var chatResponse = client.chat(request);
             if (chatResponse.getException().isPresent()) {
@@ -114,26 +140,35 @@ public class ClassDiagramByPackageGen {
                     System.out.printf("%s %s %d\n", instruction, status, chatResponse.getStatusCode().orElse(666));
                 });
             } else if (chatResponse.getResponse().isPresent()) {
-                final var response = chatResponse.getResponse().get();
-                final var chatChoice = response.getChoices().get(0);
-                final var original = chatChoice.getMessage().getContent();
-                final var mermaidDiagram = extractMermaidDiagram(original);
-                System.out.println(mermaidDiagram);
-                return validateMermaid(source, mermaidDiagram, title);
+                String mermaidDiagram = processResposne(messageListener, responseConsumer, chatResponse);
+                return validateMermaid(source, mermaidDiagram, title, messageListener, promptConsumer, responseConsumer);
             }
         }
         return "";
     }
 
-
-    private String validateMermaid(String source, String mermaidDiagram, String title) {
-        return validateMermaid(source, mermaidDiagram, title, 5);
+    private String processResposne(Consumer<Message> messageListener, Consumer<String> responseConsumer, ClientResponse<ChatRequest, ChatResponse> chatResponse) {
+        final var response = chatResponse.getResponse().get();
+        response.getChoices().stream().map(ChatChoice::getMessage).forEach(messageListener);
+        final var chatChoice = response.getChoices().get(0);
+        final var original = chatChoice.getMessage().getContent();
+        responseConsumer.accept(original);
+        return extractMermaidDiagram(original);
     }
 
-    private String validateMermaid(String source, String mermaidDiagram, String title, int count) {
+
+    private String validateMermaid(String source, String mermaidDiagram, String title,
+                                   Consumer<Message> messageListener, Consumer<String> promptConsumer,
+                                   Consumer<String> responseConsumer) {
+        return validateMermaid(source, mermaidDiagram, title, 5, messageListener, promptConsumer, responseConsumer);
+    }
+
+    private String validateMermaid(String source, String existingMermaidDiagram, String title, int count,
+                                   Consumer<Message> messageListener, Consumer<String> promptConsumer,
+                                   Consumer<String> responseConsumer) {
 
         if (count <= 0) {
-            return mermaidDiagram;
+            return existingMermaidDiagram;
         }
 
         ChatRequest.Builder builder = requesatBuilder();
@@ -142,21 +177,26 @@ public class ClassDiagramByPackageGen {
 
         final var templateMermaid = FileUtils.readFile(new File("src/main/templates/classes/fix.md"));
 
-        final var checks = ruleRunner.checkContent(mermaidDiagram);
+        final var checks = ruleRunner.checkContent(existingMermaidDiagram);
 
         if (!checks.isEmpty()) {
             final var fixInstruction = templateMermaid
                     .replace("{{JAVA_CODE}}", source)
                     .replace("{{JSON}}", RuleRunner.serializeRuleResults(checks))
-                    .replace("{{MERMAID}}", mermaidDiagram)
+                    .replace("{{MERMAID}}", existingMermaidDiagram)
                     .replace("{{TITLE}}", title);
 
             System.out.println("FIX \n\n\n-----------" + fixInstruction + "\n------------\n------------");
 
-            final var fixRequest = builder.addMessage(Message.builder().role(Role.USER)
-                    .content(fixInstruction).build()).build();
+            final var fixMessage = Message.builder().role(Role.USER)
+                    .content(fixInstruction).build();
 
+            context.forEach(messageListener);
+            messageListener.accept(fixMessage);
+            final var fixRequest = builder.addMessage(fixMessage).build();
             final var fixMermaidResponse = client.chat(fixRequest);
+
+
 
             if (fixMermaidResponse.getException().isPresent()) {
                 System.out.printf("%s\n", fixRequest);
@@ -166,10 +206,59 @@ public class ClassDiagramByPackageGen {
                     System.out.printf("%s %s %d\n", fixInstruction, status, fixMermaidResponse.getStatusCode().orElse(666));
                 });
             }
-            return validateMermaid(source, mermaidDiagram, title, count - 1);
+
+            if (fixMermaidResponse.getResponse().isPresent()) {
+                final var newMermaidDiagram = processResposne(messageListener, responseConsumer, fixMermaidResponse);
+                return validateMermaid(source, newMermaidDiagram, title, count - 1,
+                        messageListener, promptConsumer, responseConsumer);
+            } else {
+                return existingMermaidDiagram;
+            }
 
         } else {
-            return mermaidDiagram;
+            return existingMermaidDiagram;
+        }
+    }
+
+
+
+    public static Builder builder() {
+        return new Builder();
+    }
+    public static class Builder {
+        private  OpenAIClient client;
+        private  int  maxTokens = 2000;
+        private  String  model = "gpt-3.5-turbo-16k-0613";
+        private  float temperature = 0.0f;
+        private  boolean validateJson;
+
+        public Builder setClient(OpenAIClient client) {
+            this.client = client;
+            return this;
+        }
+
+        public Builder setMaxTokens(int maxTokens) {
+            this.maxTokens = maxTokens;
+            return this;
+        }
+
+        public Builder setModel(String model) {
+            this.model = model;
+            return this;
+        }
+
+        public Builder setTemperature(float temperature) {
+            this.temperature = temperature;
+            return this;
+        }
+
+        public Builder setValidateJson(boolean validateJson) {
+            this.validateJson = validateJson;
+            return this;
+        }
+
+        public ClassDiagramByPackageGen build() {
+            return  new ClassDiagramByPackageGen(this);
         }
     }
 

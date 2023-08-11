@@ -1,33 +1,19 @@
 ---
-title: Shape Hierarchy and Properties
+title: Class Diagram for HR Service and Workflow Service
 ---
 classDiagram
 
-    class Shape {
-        <<Interface>>
+    class HRService{
+        <<Service>>
+        -HRRepo repo
+        -WorkflowService workflow
+        -Logger logger
     }
 
-    class Polygon {
-        <<AbstractClass>>
-        int sides
+    class WorkflowService{
+
     }
 
-    class Rectangle {
-        double length
-        double width
-        String color
-    }
-
-    class Circle {
-        double radius
-        String color
-    }
-
-    class Triangle {
-        double base
-        double height
-    }
-
-    Rectangle --|> Polygon
-    Circle ..|> Shape
-    Triangle --|> Polygon
+    HRService *-- HRRepo: has a
+    HRService *-- WorkflowService: has a
+    HRService *-- Logger: has a
