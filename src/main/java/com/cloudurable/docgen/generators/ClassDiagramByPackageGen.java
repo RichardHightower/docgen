@@ -93,7 +93,7 @@ public class ClassDiagramByPackageGen {
             }
         }
 
-        return extractedCode.toString();
+        return extractedCode.toString().trim();
     }
 
     public String generateClassDiagramFromPackage(String packageName, String source,

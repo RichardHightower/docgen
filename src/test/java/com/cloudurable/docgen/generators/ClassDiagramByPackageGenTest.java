@@ -43,7 +43,7 @@ class ClassDiagramByPackageGenTest {
                                    String packageName, String prefix,
                                    Map<String, String> classDefsByPackage) {
 
-        final File rootDir = new File("test/" + prefix + "/output");
+        final File rootDir = new File("test/" + prefix + "/output/packages");
         rootDir.mkdirs();
 
 

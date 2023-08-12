@@ -133,7 +133,7 @@ class SequenceDiagramByMethodGenTest {
     public String testSequenceDiagram(int count, boolean ignore, String simpleClassName,
                                       String methodName, String prefix, List<JavaItem> javaItems) {
 
-        final File rootDir = new File("test/"+ prefix+"/output");
+        final File rootDir = new File("test/"+ prefix+"/output/methods");
         rootDir.mkdirs();
 
 
@@ -180,6 +180,8 @@ class SequenceDiagramByMethodGenTest {
         methodDir.mkdirs();
         File promptDir = new File(methodDir, "prompts");
         File mermaidDir = new File(methodDir, "mermaid");
+        File messageDir = new File(methodDir, "messages");
+        messageDir.mkdirs();
         promptDir.mkdirs();
         mermaidDir.mkdirs();
 
@@ -193,8 +195,20 @@ class SequenceDiagramByMethodGenTest {
         final var counter = new AtomicInteger();
         final var promptBuilder = new StringBuilder();
         final var responseBuilder = new StringBuilder();
+        final AtomicInteger messageSequence = new AtomicInteger();
+
         String mermaidCode = gen.generateSequenceFromMethod(
-                body.toString(), method.getSimpleName(), method.getParent().getName(), "org.example.model", prompt -> {
+                body.toString(), method.getSimpleName(), method.getParent().getName(),
+                message -> {
+                    final var msgNum  = messageSequence.incrementAndGet();
+                    final var tryCount = counter.get();
+                    final var msgRole = message.getRole().toString().toLowerCase();
+                    final var content = message.getContent();
+                    File outputFile = new File(messageDir,
+                            String.format("message_%d_%d_%s.md", tryCount, msgNum, msgRole ));
+                    FileUtils.writeFile(outputFile, content);
+                },
+                prompt -> {
                     promptBuilder.append(prompt);
                     counter.incrementAndGet();
                     File outputFile = new File(promptDir, "prompt_" + counter.get() + ".md");

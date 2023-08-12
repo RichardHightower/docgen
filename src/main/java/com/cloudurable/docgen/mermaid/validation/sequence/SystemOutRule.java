@@ -8,9 +8,9 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class SystemOutRule implements LineRule {
-    private final Pattern PATTERN = Pattern.compile("System\\.out");
-    private final String RULE_NAME = "System Out Rule";
-    private final String RULE_DESCRIPTION = "Avoid using System.out in your mermaid code.";
+    private static final Pattern PATTERN = Pattern.compile("System\\.out");
+    public static final  String RULE_NAME = "System Out Rule";
+    public static final String RULE_DESCRIPTION = "Avoid using System.out in your mermaid code use Console.";
 
     @Override
     public RuleResult check(String line, int lineNumber) {

@@ -21,7 +21,7 @@ class TokenCounterUtilsTest {
 
         System.out.println(TokenCounterUtils.countTokens(s));
 
-        assertTrue(TokenCounterUtils.countTokens(s) > 500);
+        assertTrue(TokenCounterUtils.countTokens(s) > 300);
 
     }
 

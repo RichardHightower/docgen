@@ -5,166 +5,14 @@
 3. PaymentProcessor
 4. EmailService
 5. UserService
-6. OrderManager
-7. InventoryManager
-8. NotificationService
-9. AnalyticsService
-10. RecommendationEngine
 
 # Undesirable Participants
 
 1. String
 2. Integer
-3. Float
-4. Boolean
+3. float
+4. boolean
 5. byte[]
-6. Throwable
-7. Exception
-8. System.out
-9. File
-10. ObjectNode
-
-# Sequence Diagram 1: User Registration
-
-## Mermaid Sequence Diagram
-```mermaid
----
-title: User Registration
----
-sequenceDiagram
-
-
-    participant User
-    participant UserService
-    participant Database
-
-    User->>UserService: Registration Request
-    alt User is valid
-        UserService->>Database: Check User
-        alt User does not exist
-            UserService->>Database: Create User
-            UserService->>User: Registration Successful
-        else User exists
-            UserService->>User: Registration Failed
-        end
-    else User is invalid
-        UserService->>User: Registration Failed
-    end
-```
-
-## Java Code Example
-```java
-public class UserService {
-    //...
-
-    public void registerUser(User user) {
-        if (isValidUser(user)) {
-            if (!database.userExists(user)) {
-                database.createUser(user);
-                user.registrationSuccessful();
-            } else {
-                user.registrationFailed();
-            }
-        } else {
-            user.registrationFailed();
-        }
-    }
-    //...
-}
-```
-
-# Sequence Diagram 2: Order Processing
-
-## Mermaid Sequence Diagram
-```mermaid
----
-title: Order Processing
----
-sequenceDiagram
-
-
-    participant User
-    participant OrderManager
-    participant InventoryManager
-    participant PaymentProcessor
-    participant NotificationService
-
-    User->>OrderManager: Place Order
-    OrderManager->>InventoryManager: Check Product Availability
-    alt Products are available
-        InventoryManager->>OrderManager: Products Available
-        OrderManager->>PaymentProcessor: Process Payment
-        PaymentProcessor->>OrderManager: Payment Processed
-        OrderManager->>NotificationService: Send Order Confirmation
-        NotificationService-->>User: Order Confirmation
-    else Products are not available
-        InventoryManager->>OrderManager: Products Not Available
-        OrderManager-->>User: Order Failed
-    end
-```
-
-## Java Code Example
-```java
-public class OrderManager {
-    private InventoryManager inventoryManager;
-    private PaymentProcessor paymentProcessor;
-    private NotificationService notificationService;
-
-    public void processOrder(User user, Order order) {
-        if (isValidOrder(order)) {
-            if (inventoryManager.checkProductAvailability(order)) {
-                paymentProcessor.processPayment(order);
-                notificationService.sendOrderConfirmation(user, order);
-            } else {
-                user.orderFailed();
-            }
-        } else {
-            user.orderFailed();
-        }
-    }
-    //...
-}
-
-```
-
-# Sequence Diagram 3: Article Processing
-
-## Mermaid Sequence Diagram
-```mermaid
----
-title: Article Processing
----
-sequenceDiagram
-
-
-    participant User
-    participant NewsService
-    participant ArticleSorter
-    participant EmailService
-    participant AnalyticsService
-
-    User->>NewsService: Submit Article
-    NewsService->>ArticleSorter: Sort Article
-    ArticleSorter-->>NewsService: Sorted Article
-    NewsService->>EmailService: Send Notifications
-    EmailService-->>NewsService: Notifications Sent
-    NewsService->>AnalyticsService: Track Article Views
-```
-
-## Java Code Example
-```java
-public class NewsService {
-    private ArticleSorter articleSorter;
-    private EmailService emailService;
-    private AnalyticsService analyticsService;
-
-    public void processArticle(User user, Article article) {
-        articleSorter.sortArticle(article);
-        emailService.sendNotifications(article);
-        analyticsService.trackArticleViews(article);
-    }
-}
-```
 
 # Java Method 1: Fibonacci Series
 
@@ -487,7 +335,6 @@ public class Department {
     }
 }
 //...
-}
 ```
 
 ## Mermaid Sequence Diagram

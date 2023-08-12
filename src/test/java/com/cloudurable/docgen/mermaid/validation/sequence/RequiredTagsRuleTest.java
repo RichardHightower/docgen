@@ -295,5 +295,29 @@ public class RequiredTagsRuleTest {
 
     }
 
+    @Test
+    public void test() {
+        final var content = "---\n" +
+                "title: Generating toString\n" +
+                "---\n" +
+                "sequenceDiagram\n" +
+                "\n" +
+                "\n" +
+                "    participant Department\n" +
+                "    participant StringBuilder\n" +
+                "    \n" +
+                "    Department->>StringBuilder: Append Department Name\n" +
+                "    Department->>StringBuilder: Append Manager\n" +
+                "    Department->>StringBuilder: Append Employees\n" +
+                "    loop Append Employees\n" +
+                "        Department->>StringBuilder: Append Employee\n" +
+                "    end\n" +
+                "    Department->>StringBuilder: Convert to String";
+
+        RuleResult result = rule.check(content);
+        assertEquals(RuleResult.SUCCESS, result);
+
+    }
+
 
 }

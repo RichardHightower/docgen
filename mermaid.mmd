@@ -1,28 +1,24 @@
 ---
-title: HR Service and Workflow Service Relationship Diagram
+title: Change Employee Department
 ---
-classDiagram
 
-  class HRService {
-    <<@Service>>
-    HRRepo repo
-    WorkflowService workflow
-    Logger logger
-  }
-  
-  class WorkflowService {
-  
-  }
-  
-  class HRRepo {
-  
-  }
-  
-  class Logger {
-  
-  }
-  
-  HRService "1" --> "*" HRRepo : owns
-  HRService "1" --> "1" WorkflowService : uses
-  HRService "1" --> "1" Logger : uses
+sequenceDiagram
+    participant HRService
+    participant Employee
+    participant Department
+    participant WorkflowService
+    participant Logger
+    participant Level
+    participant HRRepo
+    participant HRRepoException
 
+    HRService->>Employee: changeEmployeeDepartment
+    HRService->>Employee: isNewHire
+    alt "New Hire"
+        HRService->>Department: getManager
+        HRService->>HRRepo: updateManager
+        HRService->>HRRepo: updateDepartment
+    else "Not a New Hire"
+        HRService->>WorkflowService: initiateChangeDepartmentWorkflow
+    end
+    HRRepoException->>Logger: log

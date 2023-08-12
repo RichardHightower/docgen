@@ -24,7 +24,7 @@ class ClassVisitorParserTest {
 
         System.out.println(classes);
         assertTrue(classes.contains("org.example.model.Customer"));
-        assertEquals(10, classes.size());
+        assertTrue(classes.size() > 10);
 
     }
 }

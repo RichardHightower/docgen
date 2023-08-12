@@ -180,6 +180,14 @@ classDiagram
 | Bi-Directional    | Two-way relationship between classes.                   | Navigation from both.   | `class Teacher { List<Student> students; }` | `Teacher --> "0 to 30" Student: students` |
 | Association Class | Class adding attributes to an association.              | Additional association info. | `class Enrollment { Student student; int grade; }` | `Enrollment --> Student: student` |
 
+
+| Aggregation   | Set  | `class University { Set<Student> students; }`         | `University o-- "many" Student: students` |
+| Composition   | Set  | `class House { Set<Room> rooms; }`                    | `House *-- "many" Room: rooms` |
+| Aggregation   | Set  | `class University { Map<String, Student> students; }` | `University o-- "many" Student: students` |
+| Composition   | Set  | `class House { Map<String, Room> rooms; }`            | `House *-- "many" Room: rooms` |
+| Aggregation   | Set  | `class University { Map<Class, Student> students; }`  | `University o-- "many" Student: students` |
+| Composition   | Set  | `class House { Map<Room, Window> windows; }`          | `House *-- "many" Room : rooms` and `House *-- "many" Window: windows` |
+
 # Relationships Cardinality
 
 The cardinality is on the outside of the relationship type 
