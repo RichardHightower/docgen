@@ -61,7 +61,10 @@ class ClassDiagramByPackageGenTest {
                 .setModel("gpt-3.5-turbo-16k")
                 .setTemperature(0.0f)
                 .setMaxTokens(2000)
-                .setValidateJson(false).build();
+                .setValidateJson(false)
+                .setNumChoices(1)
+                .build();
+
 
         final var counter = new AtomicInteger();
         final var promptBuilder = new StringBuilder();

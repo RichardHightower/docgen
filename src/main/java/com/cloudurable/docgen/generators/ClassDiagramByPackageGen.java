@@ -26,6 +26,7 @@ public class ClassDiagramByPackageGen {
     private final String  model; //
     private final float temperature;
     private final boolean validateJson;
+    private final int numChoices;
 
     private final File templateDir = new File("src/main/templates/methods/");
 
@@ -35,6 +36,7 @@ public class ClassDiagramByPackageGen {
         this.model = builder.model;
         this.temperature = builder.temperature;
         this.validateJson = builder.validateJson;
+        this.numChoices = builder.numChoices;
 
 
         client = builder.client == null ?
@@ -58,7 +60,8 @@ public class ClassDiagramByPackageGen {
 
     private ChatRequest.Builder requesatBuilder() {
         return ChatRequest.builder().messages(context)
-                .maxTokens(maxTokens).temperature(temperature).model(model);
+                .maxTokens(maxTokens).temperature(temperature)
+                .completionCount(numChoices).model(model);
 
         //"gpt-3.5-turbo-16k-0613"
     }
@@ -185,8 +188,6 @@ public class ClassDiagramByPackageGen {
                     .replace("{{MERMAID}}", existingMermaidDiagram)
                     .replace("{{TITLE}}", title);
 
-            System.out.println("FIX \n\n\n-----------" + fixInstruction + "\n------------\n------------");
-
             final var fixMessage = Message.builder().role(Role.USER)
                     .content(fixInstruction).build();
 
@@ -230,6 +231,13 @@ public class ClassDiagramByPackageGen {
         private  String  model = "gpt-3.5-turbo-16k-0613";
         private  float temperature = 0.0f;
         private  boolean validateJson;
+        private int numChoices = 1;
+
+
+        public Builder setNumChoices(int numChoices) {
+            this.numChoices = numChoices;
+            return this;
+        }
 
         public Builder setClient(OpenAIClient client) {
             this.client = client;
