@@ -1,18 +1,17 @@
 ---
 title: Change Employee Department
 ---
+
 sequenceDiagram
     participant HRService
+    participant Employee
     participant WorkflowService
     participant HRRepo
-
-    HRService->>WorkflowService: Initiate Change Department Workflow
-    alt Employee is not a new hire
-        HRService-->>WorkflowService: Workflow Initiated
-    else Employee is a new hire
-        HRService->>HRRepo: Update Manager
-        HRService->>HRRepo: Update Department
-        alt HRRepoException Caught
-            HRService-->>HRService: Log Error
-        end
+    participant Logger
+    
+    HRService->>Employee: Check if new hire
+    alt Non-new hire employee
+        HRService->>WorkflowService: Initiate change department workflow
+    else New hire employee
+        HRService->>HRRepo: Update manager and department
     end

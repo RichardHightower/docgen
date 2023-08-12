@@ -14,6 +14,9 @@ public class RuleResult {
     public static RuleResult SUCCESS = RuleResult.builder().ruleName("pass")
             .description("success").violatedLine("n/a").build();
 
+    public static RuleResult EMPTY_CONTENT = RuleResult.builder().ruleName("empty")
+            .description("fail").violatedLine("Mermaid Diagram Content was null, validation skipped").build();
+
     private final int lineNumber;
     private final String violatedLine;
     private final String ruleName;

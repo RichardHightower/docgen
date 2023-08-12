@@ -87,8 +87,13 @@ public class Relationship {
 
         if (left.contains("\"")) {
             String[] split = left.split("\"");
-            leftClass = split[0].trim();
-            leftCard = split[1].trim();
+            if (split.length >= 2) {
+                leftClass = split[0].trim();
+                leftCard = split[1].trim();
+            } else {
+                leftClass = "";
+                leftCard = "";
+            }
         } else {
             leftClass = left;
         }

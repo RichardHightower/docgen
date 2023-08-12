@@ -7,6 +7,12 @@ test.txt
 ./out
 ./config/
 config/
+test/all/output1
+test/all/output2
+test/all/output3
+test/all/output4
+test/all/*.zip
+
 
 
 

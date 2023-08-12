@@ -31,6 +31,6 @@ class SystemOutRuleTest {
         assertEquals(line, result.getViolatedLine());
         assertEquals(lineNumber, result.getLineNumber());
         assertEquals("System Out Rule", result.getRuleName());
-        assertEquals("Avoid using System.out in your mermaid code.", result.getDescription());
+        assertEquals(SystemOutRule.RULE_DESCRIPTION, result.getDescription());
     }
 }
