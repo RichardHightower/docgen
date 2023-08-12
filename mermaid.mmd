@@ -1,18 +1,28 @@
 ---
-title: Class Diagram for org.example.service Package
+title: HR Service and Workflow Service Relationship Diagram
 ---
 classDiagram
 
-    class HRService {
-        <<Service>>
-        HRRepo repo
-        WorkflowService workflow
-        Logger logger
-    }
-
-    class WorkflowService {
-    }
-
-    HRService --> HRRepo: repo
-    HRService --> WorkflowService: workflow
+  class HRService {
+    <<@Service>>
+    HRRepo repo
+    WorkflowService workflow
+    Logger logger
+  }
+  
+  class WorkflowService {
+  
+  }
+  
+  class HRRepo {
+  
+  }
+  
+  class Logger {
+  
+  }
+  
+  HRService "1" --> "*" HRRepo : owns
+  HRService "1" --> "1" WorkflowService : uses
+  HRService "1" --> "1" Logger : uses
 

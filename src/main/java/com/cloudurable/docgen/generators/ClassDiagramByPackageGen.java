@@ -1,12 +1,9 @@
 package com.cloudurable.docgen.generators;
 
-import com.cloudurable.docgen.mermaid.validation.classes.InterfaceRule;
+import com.cloudurable.docgen.mermaid.validation.classes.*;
 import com.cloudurable.docgen.mermaid.validation.sequence.TitleRequiredRule;
 import com.cloudurable.docgen.util.FileUtils;
 import com.cloudurable.docgen.mermaid.validation.*;
-import com.cloudurable.docgen.mermaid.validation.classes.NoArrayRule;
-import com.cloudurable.docgen.mermaid.validation.classes.NoCollectionRule;
-import com.cloudurable.docgen.mermaid.validation.classes.NoPrimitiveOrBasicTypesRule;
 import com.cloudurable.docgen.util.Env;
 import com.cloudurable.docgen.util.MermaidUtils;
 import com.cloudurable.jai.OpenAIClient;
@@ -68,9 +65,11 @@ public class ClassDiagramByPackageGen {
 
     private static RuleRunner buildRuleRunner() {
         RuleRunner ruleRunner;
-        ruleRunner = RuleRunner.builder().contentRules(List.of(new TitleRequiredRule(), MermaidUtils.createRule()))
-
-                .rules(List.of(new NoCollectionRule(), new NoPrimitiveOrBasicTypesRule(), new NoArrayRule(), new InterfaceRule()))
+        ruleRunner = RuleRunner.builder().contentRules(List.of(new TitleRequiredRule(), new InheritanceInsideClassRule(),
+                        MermaidUtils.createRule()))
+                .rules(List.of(new NoCollectionRule(), new NoPrimitiveOrBasicTypesRule(),
+                        new NoInlineInheritanceRule(), new NoArrayRule(), new InterfaceRule(),
+                        new ClassBracketsRule()))
                 .build();
         return ruleRunner;
     }

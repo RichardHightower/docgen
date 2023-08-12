@@ -8,15 +8,15 @@ import java.util.regex.Pattern;
 
 public class InterfaceRule implements LineRule {
 
-    private final Pattern PATTERN = Pattern.compile("^interface\\s+([A-Za-z0-9_]+)\\s*\\{$");
+    private final Pattern PATTERN = Pattern.compile("^interface\\s+([A-Za-z0-9_]+)\\s*");
 
     @Override
     public RuleResult check(String line, int lineNumber) {
         Matcher matcher = PATTERN.matcher(line);
         if (matcher.find()) {
             String interfaceName = matcher.group(1);
-            String description = "Instead of using 'interface " + interfaceName + " {', " +
-                    "use 'class " + interfaceName + " {\n\t<<interface>>'.";
+            String description = "Instead of using interface YourInterface {, " +
+                    "use 'class YourInterface {\n\t<<interface>>'.";
             return RuleResult.builder()
                     .ruleName("InterfaceRule")
                     .lineNumber(lineNumber)

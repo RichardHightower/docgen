@@ -1,11 +1,16 @@
-# Inputs 
 
-## Broken Mermaid code 
+# Instructions
+
+Let's walk through process of fixing and recreating a mermaid class diagram and then recreate a mermaid class diagram. 
+
+## Inputs
+
+### Use this ***Broken Mermaid code*** if present
 ```
 {{MERMAID}}
 ```
 
-## Java code
+### Use this ***Java code*** if present
 
 ```java
 
@@ -13,19 +18,13 @@
 
 ```
 
-
-
-## Validation JSON
+### Validation JSON
 
 ```javascript 
 
 {{JSON}}
 
 ```
-
-
-# Instructions
-
 
 ## ***Description of Validation Issues***: Describe Validation Issues From `Validation JSON` in plain English
 (markdown list)

@@ -1,15 +1,14 @@
-# Input
+# Instruction
 
-## Java code
+Let's walk through process of creating a mermaid class diagram and then create a mermaid class diagram.
+
+## Input - Use this ***Java code*** if present
 
 ```java
 
 {{JAVA_CODE}}
 
 ```
-
-
-# Instruction
 
 ## Create a ***Plain English Title*** for the diagram based on {{TITLE}} and overview of classes
 (markdown)
@@ -27,6 +26,7 @@
 
 ## **Relationship Details List** : List the relationships and describe why you picked that relationship type and its cardinality. Do not include cardinality 1 to 1 in the description or final diagram.
 (markdown format)
+
 
 ## Mermaid diagram
 

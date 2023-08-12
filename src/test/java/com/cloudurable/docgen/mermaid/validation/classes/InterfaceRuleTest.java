@@ -23,8 +23,10 @@ public class InterfaceRuleTest {
         assertEquals("InterfaceRule", result.getRuleName());
         assertEquals(1, result.getLineNumber());
         assertEquals(testInput, result.getViolatedLine());
-        assertEquals("Instead of using 'interface MyInterface {', use 'class MyInterface {\n\t<<interface>>'.", result.getDescription());
+        assertEquals("Instead of using interface YourInterface {, use 'class YourInterface {\n" +
+                "\t<<interface>>'.", result.getDescription());
     }
+
 
     @Test
     public void testInvalidInterfaceDeclaration() {
@@ -33,4 +35,29 @@ public class InterfaceRuleTest {
 
         assertEquals(RuleResult.SUCCESS, result);
     }
+
+    @Test
+    public void testNoBrackets() {
+        String testInput = "interface HRFoo";
+        RuleResult result = interfaceRule.check(testInput, 1);
+
+        assertEquals("InterfaceRule", result.getRuleName());
+        assertEquals(1, result.getLineNumber());
+        assertEquals(testInput, result.getViolatedLine());
+        assertEquals("Instead of using interface YourInterface {, use 'class YourInterface {\n" +
+                "\t<<interface>>'.", result.getDescription());
+    }
+
+    @Test
+    public void testNoBracketsSpaces() {
+        String testInput = "interface HRFoo        ";
+        RuleResult result = interfaceRule.check(testInput, 1);
+
+        assertEquals("InterfaceRule", result.getRuleName());
+        assertEquals(1, result.getLineNumber());
+        assertEquals(testInput, result.getViolatedLine());
+        assertEquals("Instead of using interface YourInterface {, use 'class YourInterface {\n" +
+                "\t<<interface>>'.", result.getDescription());
+    }
+
 }

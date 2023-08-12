@@ -17,42 +17,6 @@ Mermaid Class Diagram
 Your task is to generate a class diagram for each class in the package, showing relationships such as inheritance,
 interface implementation, and aggregation, if any. Please use the following from Mermaid class diagram syntax:
 
-- 
-## Concise Mermaid Guide for Class Diagrams
-- **Always include a title**
-- **Initiate class diagram**: Use `classDiagram`.
-- **Declare a class**: `class ClassName { \n }`.
-- **Abstract class**: Use `class ClassName { \n<<Abstract>>\n }`.
-- **Interface class**: Use `class ClassName { \n<<Interface>>\n }`.
-- **Declare fields inside class**: Add between `{}`, e.g., `class { <fields go here> }` in a new line each.
-- **Composition and association are inferred from fields and their names**: 
-  - List or Set could imply composition, a single instance could imply association. 
-  - Pick best based on context of name and type.
-- Relationship types
-  - **Inheritance**: `Animal <|-- Person` or `Person --|> Animal`
-  - **Interface implementation**: `Person <|.. TruckDriver` or `TruckDriver ..|> Person`
-  - **Composition**: `Engine *-- SparkPlugs: plugs`.
-  - **Aggregation**: `Engine o-- Oil: needsOil`.
-  - **Directional Association**: Use `Insurance --> Car: insures`.
-  - **Association Strong**: `Class1 -- Class2: fieldName`.
-  - **Association Weak**: `Class1 .. Class2: fieldName`.
-- Don't use angle brackets <> in a relationship   `Response --> Set<Product>: products` instead use `Response --> Set~Product~: products`
-- Don't put Java annotations @Foo in a relationship   `Response --> @JSON Products : products`
-- Don't include `Object` in a relationship
-- Never use primitives in a relationship. Don't use int, long, short, String, etc.
-- **Add field names in relationships**: Use `:`.
-- **Specify cardinality**: Use near the end of an association, options: "1", "0-->1", "1--o", "", "n", "0--*n", "1..n".
-  - To reduce clutter, do not specify cardinality if it is 1 to 1. 
-- **Annotate classes**: The annotation goes inside the class definition. Use `<<annotation>>`. Examples: `<<interface>>`, `<<abstract>>`, `<<Service>>`, `<<enumeration>>`.
-- **Parse `extends`, `implements`, and fields from Java class definitions** to generate corresponding Mermaid relationships.
-- **Composition and association are inferred from fields and their names**: List or Set could imply composition, a single instance could imply association. Pick best based on context of name and type.
-- **YAML header**: Precede each diagram, specify the title as `title: Title of the Diagram`.
-- Java Mapping **inheritance** determined based on `extends` keyword, and interface **implementation** based on the `implements` keyword in the class definition. 
-- Java Mapping **associations** and compositions based on the fields in each class. 
-  - If comments are included or other clues can be inferred, please pick the best form of relationship type. 
-  - Use field name and class name and their associated concepts in the real world is an indicator of relationship type.
-- Java annotations become Mermaid annotations
-
 - Don't use <> in a relationship
   - WRONG:`Response --> Set<Product>: products`
   - CORRECT: `Response "one"--"many"> products : Set of Products`
@@ -200,34 +164,7 @@ classDiagram
   Car --> Driver: associated driver
 
 ```
-### Explanation of Automobile Example showing relationship types in Mermaid
 
-### Explanation of the Automobile Example:
-
-- **Vehicle**: This is an interface. In Java, this would be declared as `public interface Vehicle { }`.
-- **Automobile**: An abstract class, which is a general class representing all automobiles. 
-  - It realizes the Vehicle interface.
-- **Car**: This is a specific type of Automobile and extends the Automobile abstract class. 
-  - It has the following fields:
-    - `List<Tire> tires`: Indicates that a Car is composed of tires. There are multiple tires, so it's a list.
-    - `Engine engine`: Each car has one engine. This is a composition relationship.
-    - `Driver driver`: Each car is associated with one driver.
-- **Insurance**: Represents car insurance with the following fields:
-  - `Date issued`: The date the insurance was issued.
-  - `Date expired`: The date the insurance will expire.
-  - `Driver driver`: The driver insured.
-  - `List<Car> Cars`: A list of cars that the insurance covers.
-- **Driver**: Represents a person who drives a car. It has fields for their license and insurance.
-- **License**: Represents a driving license. It's associated with a driver.
-- **Engine**: Represents a car engine. It needs oil and gas to function.
-
-#### Relationships:
-- Automobile realizes the Vehicle interface.
-- Insurance insures multiple Car objects.
-- An Engine requires both oil and gas to operate.
-- A Driver requires both a License and Insurance.
-- A Car is a type of Automobile.
-- A Car has an engine and is composed of four tires. It is also associated with a driver.
 
 # Relationships
 

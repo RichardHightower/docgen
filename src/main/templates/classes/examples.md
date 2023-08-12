@@ -3,7 +3,7 @@
 ## Java Input 1:
 
 ```java
-public interface Computable { }
+public interface Computable <KEY, PARAM> { }
 
 @Product 
 public class Computer {
@@ -27,7 +27,7 @@ title: Computer Components Relationship
 ---
 classDiagram
 
-    class Computable{
+    class Computable {
         <<interface>>
     }
 
@@ -258,3 +258,9 @@ public class Laptop {
 }
 
 ```
+
+Remember 
+| Inheritance               | `class Dog extends Animal { }`  | `Dog --|> Animal`     |
+| Interface Implementation  | `class Cat implements Pet { }`  | `Cat ..|> Pet`        |
+| Inheritance Exception     | `class MyCustomException extend RuntimeException { }`     | `MyCustomException --|> RuntimeException`        |
+
